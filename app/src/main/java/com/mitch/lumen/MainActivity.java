@@ -144,25 +144,40 @@ public class MainActivity extends Activity {
         }
     }
 
-    private String iconFor(ResolveInfo ri, PackageManager pm) {
-        String pkg = ri.activityInfo.packageName;
-        String cached = iconCache.get(pkg);
-        if (cached != null) return cached;
+    private String toDataUrl(Drawable d, int w, int h) {
         try {
-            Drawable d = ri.loadIcon(pm);
-            int size = 192;
-            Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(bmp);
-            d.setBounds(0, 0, size, size);
+            d.setBounds(0, 0, w, h);
             d.draw(c);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-            String url = "data:image/png;base64," + Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
-            iconCache.put(pkg, url);
-            return url;
+            return "data:image/png;base64," + Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
         } catch (Exception e) {
             return "";
         }
+    }
+
+    private String iconFor(ResolveInfo ri, PackageManager pm) {
+        String key = ri.activityInfo.packageName + "#icon";
+        String cached = iconCache.get(key);
+        if (cached != null) return cached;
+        String url = toDataUrl(ri.loadIcon(pm), 192, 192);
+        iconCache.put(key, url);
+        return url;
+    }
+
+    /** The app's TV banner (the wide 16:9 artwork made for TV home screens), if it has one. */
+    private String bannerFor(ResolveInfo ri, PackageManager pm) {
+        String key = ri.activityInfo.packageName + "#banner";
+        String cached = iconCache.get(key);
+        if (cached != null) return cached;
+        Drawable d = null;
+        try { d = ri.activityInfo.loadBanner(pm); } catch (Exception ignored) { }
+        if (d == null) try { d = ri.activityInfo.applicationInfo.loadBanner(pm); } catch (Exception ignored) { }
+        String url = d == null ? "" : toDataUrl(d, 640, 360);
+        iconCache.put(key, url);
+        return url;
     }
 
     private static String firstNumber(String s) {
@@ -191,6 +206,7 @@ public class MainActivity extends Activity {
                     o.put("pkg", ri.activityInfo.packageName);
                     o.put("name", ri.loadLabel(pm).toString());
                     o.put("icon", iconFor(ri, pm));
+                    o.put("banner", bannerFor(ri, pm));
                     out.put(o);
                 } catch (Exception ignored) { }
             }
