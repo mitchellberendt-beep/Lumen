@@ -14,12 +14,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
       - name: Build APK
-        run: gradle assembleRelease -PversionCode=${{ github.run_number }} --no-daemon
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          gradle assembleRelease -PversionCode=${{ github.run_number }} --no-daemon
       - name: Name the APK
         run: cp app/build/outputs/apk/release/app-release.apk Lumen-1.${{ github.run_number }}.apk
       - name: Publish release
