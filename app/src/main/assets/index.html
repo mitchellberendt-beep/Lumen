@@ -64,9 +64,9 @@ body { background: var(--ink); color: var(--fg); overflow: hidden; font-family: 
 .clock span { font-size: 19px; color: var(--mute); white-space: nowrap; }
 
 /* title */
-.hero { height: 168px; margin-top: 26px; }
+.hero { height: 140px; margin-top: 18px; }
 .hero .kicker { font-family: var(--mono); font-size: 18px; letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--hk, 250) 60% 80%); transition: color 1s; }
-.hero h1 { font-family: var(--display); font-weight: 300; font-size: 92px; line-height: .98; letter-spacing: -.035em; margin: 8px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero h1 { font-family: var(--display); font-weight: 300; font-size: 80px; line-height: .98; letter-spacing: -.035em; margin: 8px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hero p { font-size: 24px; color: var(--mute); margin: 10px 0 0; }
 .hero .fd { transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1); }
 .hero.swap .fd { opacity: 0; transform: translate(calc(var(--dx, 0) * -14px), calc(var(--dy, 0) * -8px)); }
@@ -83,38 +83,38 @@ html.device .stage { border-radius: 0; }
 .no-hero .hero { display: none; }
 
 /* shelves */
-.sec { margin-top: 30px; }
+.sec { margin-top: 22px; }
 .sec.lead { margin-top: 22px; }
-.label { font-weight: 600; font-size: 22px; color: var(--mute); letter-spacing: .02em; margin: 0 0 14px; display: flex; gap: 14px; align-items: baseline; }
+.label { font-weight: 600; font-size: 22px; color: var(--mute); letter-spacing: .02em; margin: 0 0 12px; display: flex; gap: 14px; align-items: baseline; }
 .label small { font-weight: 400; font-size: 18px; opacity: .7; }
 .row { display: grid; gap: 24px; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
 .row.big { gap: 32px; }
-.row.fill .tile.small { aspect-ratio: auto; height: 122px; }
 .pair { display: grid; grid-template-columns: calc((100% - 176px) / 7 * 6 + 120px) minmax(0, 1fr); gap: 56px; }
 .pair > .sec { margin-top: 0; }
-.pairwrap { margin-top: 30px; }
-.tile.all { background: rgb(255 255 255 / .06); box-shadow: inset 0 0 0 2px var(--line); }
-.tile.all .logo { background: none; }
-.tile.all .logo svg { width: 30px; height: 30px; }
-.tile { position: relative; aspect-ratio: 16 / 9; border-radius: calc(22px * var(--r)); overflow: hidden; cursor: pointer;
+.pairwrap { margin-top: 22px; }
+.row.fill .tw.small .art { aspect-ratio: auto; height: 112px; }
+.tw { position: relative; cursor: pointer; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.art { position: relative; aspect-ratio: 16 / 9; border-radius: calc(22px * var(--r)); overflow: hidden;
   background: linear-gradient(150deg, hsl(var(--th) var(--ts) 38%), hsl(calc(var(--th) + 18) var(--ts) 15%));
   box-shadow: 0 1px 0 rgb(255 255 255 / .08) inset; transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s; }
-.tile.small { border-radius: calc(14px * var(--r)); }
-.tile .nm { position: absolute; left: 26px; top: 22px; right: 100px; font-family: var(--display); font-weight: 500; font-size: 36px; letter-spacing: -.01em; line-height: 1.05; }
-.tile.small .nm { left: 15px; top: 13px; right: 54px; font-size: 20px; }
-.nm-bottom .tile .nm { top: auto; bottom: 22px; }
-.nm-bottom .tile.small .nm { bottom: 13px; }
-.hide-names .tile .nm { display: none; }
-.tile .logo { position: absolute; right: 20px; top: 20px; width: 64px; height: 64px; border-radius: calc(15px * var(--r)); overflow: hidden;
-  background: rgb(255 255 255 / .14); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 32px; color: rgb(255 255 255 / .85); }
-.tile.small .logo { right: 11px; top: 11px; width: 34px; height: 34px; font-size: 17px; border-radius: calc(9px * var(--r)); }
-.tile .logo img { width: 100%; height: 100%; object-fit: cover; }
-.tile .sheen { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / .2) 50%, transparent 65%); transform: translateX(-120%); }
-.tile.focus { transform: scale(1.06); z-index: 2; box-shadow: 0 26px 50px -18px hsl(var(--th) 70% 22% / .9); }
-.tile.small.focus { transform: scale(1.12); }
-.row.fill .tile.small.focus { transform: scale(1.08); }
-.tile.focus .sheen { transform: translateX(120%); transition: transform 1s ease; }
-.no-stroke .tile.focus, .no-stroke .incard.focus, .no-stroke .port.focus { outline: 4px solid var(--fg); outline-offset: 5px; }
+.tw.small .art { border-radius: calc(14px * var(--r)); }
+.art img.banner { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.art img.icon { position: absolute; left: 50%; top: 50%; height: 64%; aspect-ratio: 1; transform: translate(-50%, -50%); object-fit: contain; border-radius: 18%; }
+.art .mono { position: absolute; inset: 0; display: grid; place-items: center; padding: 0 12px; text-align: center; font-family: var(--display); font-weight: 600; font-size: 46px; letter-spacing: -.02em; line-height: 1; color: rgb(255 255 255 / .92); }
+.tw.small .art .mono { font-size: 26px; }
+.cap { font-size: 24px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 4px; transition: color .18s, transform .18s; }
+.tw.small .cap { font-size: 19px; }
+.hide-names .cap { display: none; }
+.art .sheen { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / .2) 50%, transparent 65%); transform: translateX(-120%); }
+.tw.focus { z-index: 2; }
+.tw.focus .art { transform: scale(1.06); box-shadow: 0 26px 50px -18px hsl(var(--th) 70% 22% / .9); }
+.tw.small.focus .art { transform: scale(1.12); }
+.row.fill .tw.small.focus .art { transform: scale(1.08); }
+.tw.focus .cap { color: var(--fg); transform: translateY(6px); }
+.tw.focus .sheen { transform: translateX(120%); transition: transform 1s ease; }
+.tw.all .art { background: rgb(255 255 255 / .06); box-shadow: inset 0 0 0 2px var(--line); display: grid; place-items: center; }
+.tw.all .art svg { width: 44px; height: 44px; }
+.no-stroke .tw.focus .art, .no-stroke .incard.focus, .no-stroke .port.focus { outline: 4px solid var(--fg); outline-offset: 5px; }
 .peek { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); font-size: 18px; color: var(--mute); display: flex; gap: 10px; align-items: center; transition: opacity .3s; }
 .peek svg { width: 18px; height: 18px; }
 
@@ -315,8 +315,8 @@ const SAMPLE_RECENTS = { youtube: NOW - .6*H, crunchyroll: NOW - 3*H, netflix: N
 const hashHue = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7);
 const KNOWN = Object.fromEntries(SAMPLE_APPS.map(a => [a.pkg, a]));
 const TV = {
-  apps: () => AND ? JSON.parse(AND.getApps()).map(a => KNOWN[a.pkg] ? { ...KNOWN[a.pkg], icon: a.icon }
-    : { id: a.pkg, name: a.name, pkg: a.pkg, h: hashHue(a.name), s: 45, icon: a.icon }) : SAMPLE_APPS,
+  apps: () => AND ? JSON.parse(AND.getApps()).map(a => KNOWN[a.pkg] ? { ...KNOWN[a.pkg], icon: a.icon, banner: a.banner }
+    : { id: a.pkg, name: a.name, pkg: a.pkg, h: hashHue(a.name), s: 45, icon: a.icon, banner: a.banner }) : SAMPLE_APPS,
   recents: () => { if (!AND) return null; const r = JSON.parse(AND.getRecents() || "{}"), o = {}; for (const [pkg, t] of Object.entries(r)) o[KNOWN[pkg]?.id || pkg] = t; return o; },
   inputs: () => AND && AND.getInputs ? JSON.parse(AND.getInputs()) : null,
   launch: pkg => AND && pkg && AND.launch(pkg),
@@ -407,9 +407,14 @@ const portName = p => p.name || "Unassigned";
 const portLine = p => `${p.label}${p.earc ? " (eARC)" : ""} – ${portName(p)}`;
 const sectionOf = id => cfg.sections.find(s => s.apps.includes(id));
 function rel(node, root) { let x = 0, y = 0, e = node; while (e && e !== root) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x, y, w: node.offsetWidth, h: node.offsetHeight }; }
-function logoHTML(a) { const src = cfg.logos[a.id] || a.icon; return src ? `<img src="${esc(src)}" alt="">` : esc(a.name[0]); }
+function artHTML(a) {
+  const big = cfg.logos[a.id] || a.banner;
+  if (big) return `<img class="banner" src="${esc(big)}" alt="">`;
+  if (a.icon) return `<img class="icon" src="${esc(a.icon)}" alt="">`;
+  return `<span class="mono">${esc(a.name)}</span>`;
+}
 function tile(a, size) {
-  const t = el("div", "tile " + size, `<span class="sheen"></span><span class="logo">${logoHTML(a)}</span><span class="nm">${esc(a.name)}</span>`);
+  const t = el("div", "tw " + size, `<div class="art">${artHTML(a)}<span class="sheen"></span></div><div class="cap">${esc(a.name)}</div>`);
   t.style.setProperty("--th", a.h); t.style.setProperty("--ts", a.s + "%"); return t;
 }
 const JACK = `<span class="jack"></span>`;
@@ -429,6 +434,7 @@ const ring = { a: el("div", "ring"), b: el("div", "ring trail"), host: null, cur
 function ringHost(host) { if (ring.host !== host) { host.append(ring.b, ring.a); ring.host = host; ring.cur = null; } }
 function ringTo(node, scale, radius) {
   if (!ring.host) return;
+  node = node.querySelector?.(".art") || node;
   const r = rel(node, ring.host), gx = r.w * (scale - 1) / 2 + 8, gy = r.h * (scale - 1) / 2 + 8;
   ring.tgt = { x: r.x - gx, y: r.y - gy, w: r.w + 2 * gx, h: r.h + 2 * gy, rad: radius * scale + 8 };
   if (!ring.cur || cfg.reduce) { ring.cur = { ...ring.tgt }; ring.tr = { ...ring.tgt }; }
@@ -479,7 +485,7 @@ function buildHome() {
     if (last) {
       // All apps sits to the right of the last section as its own small section
       const wrap = el("div", "pair" ), side = el("section", "sec", `<div class="label">Library</div>`), srow = el("div", "row fill"); srow.style.setProperty("--cols", 1);
-      const t = el("div", "tile small all", `<span class="logo"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="nm">All apps</span>`);
+      const t = el("div", "tw small all", `<div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></div><div class="cap">All apps</div>`);
       srow.append(t); side.append(srow); wrap.append(sec, side);
       const outer = el("div", lead ? "" : "pairwrap"); outer.append(wrap); shelves.append(outer);
       if (cols < list.length) wrap.style.gridTemplateColumns = "minmax(0, 6fr) minmax(0, 1fr)";
@@ -735,13 +741,12 @@ function pgHome() { return { crumb: "Lumen Settings", title: "Home screen", note
   T("Show title above Recently used", () => cfg.hero, v => cfg.hero = v),
   HEAD("App tiles"),
   C("Most tiles per row", [[8, "8"], [10, "10"]], () => cfg.density, v => cfg.density = v),
-  T("Show app names", () => cfg.names, v => cfg.names = v),
-  C("Name position", [["top", "Top left"], ["bottom", "Bottom left"]], () => cfg.namePos, v => cfg.namePos = v),
+  T("Show app names under tiles", () => cfg.names, v => cfg.names = v),
   A("Custom logo images", () => push(pgLogos), `${Object.keys(cfg.logos).length} set`, { chev: true }),
 ] }; }
 function pgExclude() { return { crumb: "Home screen", title: "Keep out of Recently used", note: "These apps never appear in Recently used.", rows:
   apps.map(a => T(a.name, () => cfg.recents.exclude.includes(a.id), v => { cfg.recents.exclude = cfg.recents.exclude.filter(x => x !== a.id); if (v) cfg.recents.exclude.push(a.id); })) }; }
-function pgLogos() { return { crumb: "Home screen", title: "Custom logo images", note: "On the TV each tile shows the app's own logo. Pick an image here to replace it.", rows:
+function pgLogos() { return { crumb: "Home screen", title: "Custom logo images", note: "On the TV each tile shows the app's own TV banner. Pick an image here to replace it. Wide 16:9 images fit best.", rows:
   apps.map(a => I(a.name, () => cfg.logos[a.id], v => { v ? cfg.logos[a.id] = v : delete cfg.logos[a.id]; }, 256)) }; }
 
 function pgSections() { return { crumb: "Lumen Settings", title: "Sections & apps", note: "Sections marked Home appear under Recently used. All apps shows every section.", rows: [
@@ -953,7 +958,7 @@ function applyCfg() {
   stage.style.setProperty("--accent", ACCENTS[cfg.accent] || ACCENTS.amber);
   stage.style.setProperty("--r", CORNERS[cfg.corners] ?? 1);
   stage.style.setProperty("--fade", (cfg.reduce ? 0 : FADES[cfg.fade]) + "ms");
-  stage.classList.toggle("hide-names", !cfg.names); stage.classList.toggle("nm-bottom", cfg.namePos === "bottom");
+  stage.classList.toggle("hide-names", !cfg.names); 
   stage.classList.toggle("no-hero", !cfg.hero); stage.classList.toggle("no-stroke", !cfg.stroke.on); stage.classList.toggle("reduce", cfg.reduce);
   $("#glow").style.opacity = cfg.ambient.on && cfg.bg.mode !== "black" ? LEVELS[cfg.ambient.level] * (cfg.bg.mode === "image" ? .7 : 1) : 0;
   const bg = $("#bgimg"); bg.classList.toggle("on", cfg.bg.mode === "image" && !!cfg.bg.img); bg.style.backgroundImage = cfg.bg.img ? `url("${cfg.bg.img}")` : "";
