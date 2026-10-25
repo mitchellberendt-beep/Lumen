@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html,body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Lumen Home</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: fixed 1920x1080 stage, scaled to the screen (2x on a 4K panel). Screen one holds the top bar,
+   a typographic title, a large Recently used shelf and two compact section rows. Inputs sit below the fold. */
+:root {
+  color-scheme: dark;
+  --ink: #0c0d12;  --ink-2: #15161e;  --ink-3: #1e1f29;  --line: #2c2d39;
+  --fg: #eeecf3;   --mute: #918e9f;   --accent: #f0b27a;  --danger: #ff9a9a;
+  --r: 1;          --fade: 1200ms;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+html, body { height: 100%; }
+body { background: var(--ink); color: var(--fg); overflow: hidden; font-family: var(--body); box-sizing: border-box;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0; }
+#viewport { position: relative; width: 100%; height: 100%; }
+.stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden;
+  background: var(--ink); border-radius: 6px; }
+
+/* ambient light: two layers cross-fade, so color changes are a slow dissolve */
+.bgimg { position: absolute; inset: 0; background: center / cover no-repeat; opacity: 0; transition: opacity .6s; }
+.bgimg.on { opacity: .5; }
+.glow { position: absolute; inset: 0; pointer-events: none; transition: opacity .6s; }
+.glow > div { position: absolute; inset: 0; opacity: 0; will-change: opacity; transition: opacity var(--fade) cubic-bezier(.4,0,.2,1);
+  background: radial-gradient(1250px 780px at 8% -12%, hsl(var(--g) 72% 46% / .40), transparent 70%),
+              radial-gradient(1000px 680px at 110% 28%, hsl(calc(var(--g) + 36) 70% 42% / .22), transparent 70%); }
+.glow > div.on { opacity: 1; }
+.vignette { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 45%, rgb(0 0 0 / .5)); }
+
+#page { position: absolute; left: 0; top: 0; width: 1920px; padding: 44px 96px 0; box-sizing: border-box; transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+
+/* gliding focus stroke */
+.ring { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; box-sizing: border-box; border: 3px solid var(--fg);
+  box-shadow: 0 0 30px hsl(var(--rh, 250) 85% 70% / .55), inset 0 0 0 1px rgb(0 0 0 / .25); will-change: transform, width, height; }
+.ring.trail { z-index: 5; border: 2px solid hsl(var(--rh, 250) 85% 78% / .45); box-shadow: none; }
+
+/* top bar */
+.top { display: flex; align-items: center; gap: 18px; height: 72px; }
+.place { font-family: var(--display); font-weight: 500; font-size: 36px; letter-spacing: -.01em; display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.place i { width: 13px; height: 13px; border-radius: 50%; background: hsl(var(--hk, 250) 80% 70%); box-shadow: 0 0 22px hsl(var(--hk, 250) 80% 60%); transition: background 1s, box-shadow 1s; }
+.weather { display: flex; align-items: center; gap: 12px; font-size: 26px; padding-left: 22px; margin-left: 6px; border-left: 1px solid var(--line); white-space: nowrap; }
+.weather svg { width: 38px; height: 38px; }
+.weather span { color: var(--mute); font-size: 21px; }
+.tag { white-space: nowrap; font-family: var(--mono); font-size: 14px; color: var(--mute); border: 1px solid var(--line); padding: 5px 9px; border-radius: 6px; letter-spacing: .05em; margin-left: 8px; }
+.spacer { flex: 1; }
+.pill { font-family: var(--body); font-weight: 600; font-size: 23px; color: var(--fg); background: rgb(255 255 255 / .07); border: 0; border-radius: 999px;
+  padding: 13px 26px; display: flex; align-items: center; gap: 11px; cursor: pointer; transition: transform .2s, background .2s, color .2s; white-space: nowrap; }
+.pill svg { width: 24px; height: 24px; }
+.pill.focus { background: var(--fg); color: var(--ink); transform: scale(1.07); }
+.clock { text-align: right; margin-left: 14px; }
+.clock b { display: block; font-family: var(--display); font-weight: 400; font-size: 50px; line-height: 1; font-variant-numeric: tabular-nums; }
+.clock span { font-size: 19px; color: var(--mute); white-space: nowrap; }
+
+/* title */
+.hero { height: 168px; margin-top: 26px; }
+.hero .kicker { font-family: var(--mono); font-size: 18px; letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--hk, 250) 60% 80%); transition: color 1s; }
+.hero h1 { font-family: var(--display); font-weight: 300; font-size: 92px; line-height: .98; letter-spacing: -.035em; margin: 8px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero p { font-size: 24px; color: var(--mute); margin: 10px 0 0; }
+.hero .fd { transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1); }
+.hero.swap .fd { opacity: 0; transform: translate(calc(var(--dx, 0) * -14px), calc(var(--dy, 0) * -8px)); }
+.hero h1 span { display: inline-block; white-space: pre; }
+.anim-letters span { animation: lIn .5s cubic-bezier(.16,.84,.24,1) both; animation-delay: calc(var(--i) * 15ms); }
+.anim-slide span { animation: lIn .42s cubic-bezier(.16,.84,.24,1) both; }
+.anim-fade span { animation: fIn .3s ease both; }
+.hero h1.leaving span { animation: lOut .12s ease-in both; }
+@keyframes lIn { from { opacity: 0; transform: translate(calc(var(--dx, 0) * 38px), calc(var(--dy, 0) * 26px)); filter: blur(7px); } }
+@keyframes lOut { to { opacity: 0; transform: translate(calc(var(--dx, 0) * -26px), calc(var(--dy, 0) * -18px)); filter: blur(5px); } }
+@keyframes fIn { from { opacity: 0; } }
+html.device body { padding: 0; }
+html.device .stage { border-radius: 0; }
+.no-hero .hero { display: none; }
+
+/* shelves */
+.sec { margin-top: 30px; }
+.sec.lead { margin-top: 22px; }
+.label { font-weight: 600; font-size: 22px; color: var(--mute); letter-spacing: .02em; margin: 0 0 14px; display: flex; gap: 14px; align-items: baseline; }
+.label small { font-weight: 400; font-size: 18px; opacity: .7; }
+.row { display: grid; gap: 24px; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+.row.big { gap: 32px; }
+.row.fill .tile.small { aspect-ratio: auto; height: 122px; }
+.pair { display: grid; grid-template-columns: calc((100% - 176px) / 7 * 6 + 120px) minmax(0, 1fr); gap: 56px; }
+.pair > .sec { margin-top: 0; }
+.pairwrap { margin-top: 30px; }
+.tile.all { background: rgb(255 255 255 / .06); box-shadow: inset 0 0 0 2px var(--line); }
+.tile.all .logo { background: none; }
+.tile.all .logo svg { width: 30px; height: 30px; }
+.tile { position: relative; aspect-ratio: 16 / 9; border-radius: calc(22px * var(--r)); overflow: hidden; cursor: pointer;
+  background: linear-gradient(150deg, hsl(var(--th) var(--ts) 38%), hsl(calc(var(--th) + 18) var(--ts) 15%));
+  box-shadow: 0 1px 0 rgb(255 255 255 / .08) inset; transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s; }
+.tile.small { border-radius: calc(14px * var(--r)); }
+.tile .nm { position: absolute; left: 26px; top: 22px; right: 100px; font-family: var(--display); font-weight: 500; font-size: 36px; letter-spacing: -.01em; line-height: 1.05; }
+.tile.small .nm { left: 15px; top: 13px; right: 54px; font-size: 20px; }
+.nm-bottom .tile .nm { top: auto; bottom: 22px; }
+.nm-bottom .tile.small .nm { bottom: 13px; }
+.hide-names .tile .nm { display: none; }
+.tile .logo { position: absolute; right: 20px; top: 20px; width: 64px; height: 64px; border-radius: calc(15px * var(--r)); overflow: hidden;
+  background: rgb(255 255 255 / .14); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 32px; color: rgb(255 255 255 / .85); }
+.tile.small .logo { right: 11px; top: 11px; width: 34px; height: 34px; font-size: 17px; border-radius: calc(9px * var(--r)); }
+.tile .logo img { width: 100%; height: 100%; object-fit: cover; }
+.tile .sheen { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / .2) 50%, transparent 65%); transform: translateX(-120%); }
+.tile.focus { transform: scale(1.06); z-index: 2; box-shadow: 0 26px 50px -18px hsl(var(--th) 70% 22% / .9); }
+.tile.small.focus { transform: scale(1.12); }
+.row.fill .tile.small.focus { transform: scale(1.08); }
+.tile.focus .sheen { transform: translateX(120%); transition: transform 1s ease; }
+.no-stroke .tile.focus, .no-stroke .incard.focus, .no-stroke .port.focus { outline: 4px solid var(--fg); outline-offset: 5px; }
+.peek { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); font-size: 18px; color: var(--mute); display: flex; gap: 10px; align-items: center; transition: opacity .3s; }
+.peek svg { width: 18px; height: 18px; }
+
+/* inputs */
+.inputs { margin-top: 150px; padding-bottom: 60px; }
+.inputs .label { margin-bottom: 24px; }
+.dock { display: grid; grid-template-columns: repeat(var(--dcols, 3), minmax(0, 1fr)); gap: 28px; }
+.incard { position: relative; height: 220px; border-radius: calc(22px * var(--r)); padding: 26px 30px; box-sizing: border-box; cursor: pointer; overflow: hidden;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1); }
+.incard.focus { transform: scale(1.05); z-index: 2; }
+.incard .k { font-family: var(--mono); font-size: 18px; letter-spacing: .12em; text-transform: uppercase; opacity: .72; position: relative; }
+.incard .n { font-family: var(--display); font-size: 58px; letter-spacing: -.025em; margin-top: 12px; line-height: 1; position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.incard .s { position: absolute; left: 30px; bottom: 24px; font-size: 20px; display: flex; gap: 10px; align-items: center; opacity: .85; }
+.sigdot { width: 11px; height: 11px; border-radius: 50%; background: currentColor; opacity: .3; }
+.live .sigdot { background: var(--accent); opacity: 1; box-shadow: 0 0 14px var(--accent); }
+.incard .glyph { position: absolute; right: 30px; bottom: 26px; opacity: .55; }
+.st-mono { background: linear-gradient(160deg, #ececf1, #a3a4ad); color: #121216; }
+.st-mono .n { font-weight: 400; }
+.st-mono.live .sigdot { background: #121216; box-shadow: none; }
+.st-red { background: linear-gradient(150deg, #e2313b, #8f121b); color: #fff; }
+.st-red .n { font-weight: 700; letter-spacing: -.01em; }
+.st-ambient { background: linear-gradient(150deg, hsl(var(--g0, 250) 45% 30%), hsl(var(--g0, 250) 45% 13%)); }
+.st-ambient .n { font-weight: 400; }
+.st-image { background: #000 center / cover no-repeat; }
+.st-image::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgb(0 0 0 / .65), rgb(0 0 0 / .1)); }
+.st-other { background: var(--ink-2); border: 2px dashed var(--line); }
+.st-other .n { font-weight: 300; }
+.jacks { display: flex; gap: 12px; }
+
+/* port drawings */
+.jack { flex: none; width: 70px; height: 32px; position: relative; display: inline-block; }
+.jack::before { content: ""; position: absolute; inset: 0; border: 3px solid currentColor; clip-path: polygon(0 0, 100% 0, 100% 58%, 86% 100%, 14% 100%, 0 58%); border-radius: 3px; }
+.jack::after { content: ""; position: absolute; left: 15px; right: 15px; top: 10px; height: 4px; background: currentColor; border-radius: 2px; }
+.jack.sm { width: 40px; height: 19px; }
+.jack.sm::before { border-width: 2px; }
+.jack.sm::after { left: 9px; right: 9px; top: 6px; height: 3px; }
+
+/* overlays */
+.layer { position: absolute; inset: 0; z-index: 20; }
+.solid { background: var(--ink); }
+.ov-head { position: absolute; left: 96px; right: 96px; top: 64px; display: flex; align-items: baseline; gap: 22px; }
+.ov-head h2 { font-family: var(--display); font-weight: 300; font-size: 84px; letter-spacing: -.03em; margin: 0; }
+.ov-head span { font-family: var(--mono); font-size: 19px; color: var(--mute); letter-spacing: .05em; }
+.scroller { position: absolute; left: 0; right: 0; top: 190px; bottom: 0; overflow: hidden; }
+.inner { position: relative; padding: 24px 96px 120px; transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+.inner .sec:first-child { margin-top: 0; }
+
+.ports { display: grid; grid-template-columns: repeat(var(--pc, 5), minmax(0, 1fr)); gap: 26px; }
+.port { position: relative; height: 270px; border-radius: calc(20px * var(--r)); border: 2px dashed var(--line); padding: 28px; box-sizing: border-box; cursor: pointer;
+  background: rgb(255 255 255 / .02); color: var(--mute); transition: transform .18s cubic-bezier(.2,.8,.2,1), background .18s; }
+.port.focus { transform: scale(1.05); background: rgb(255 255 255 / .07); color: var(--fg); z-index: 2; }
+.port .id { font-family: var(--mono); font-weight: 600; font-size: 28px; letter-spacing: .05em; color: var(--fg); margin-top: 34px; display: flex; gap: 12px; align-items: center; }
+.port .pn { font-size: 24px; margin-top: 8px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.port.focus .pn { color: var(--fg); }
+.port.unassigned .pn { font-style: italic; opacity: .6; }
+.port .sigdot { position: absolute; right: 26px; top: 30px; }
+.port .foot { position: absolute; left: 28px; bottom: 24px; font-size: 18px; color: var(--mute); }
+.port.earc { border: 2px solid color-mix(in srgb, var(--accent) 75%, transparent); background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%); }
+.port.earc .jack { color: var(--accent); }
+.badge { font-family: var(--mono); font-size: 15px; font-weight: 600; letter-spacing: .06em; color: var(--ink); background: var(--accent); border-radius: 6px; padding: 3px 8px; }
+.port .wave { position: absolute; right: 26px; bottom: 22px; width: 56px; color: var(--accent); }
+.port.air { border-style: solid; border-color: var(--line); }
+.port.air .gl { width: 70px; height: 40px; }
+
+.launch { display: grid; place-content: center; text-align: center; background: linear-gradient(160deg, hsl(var(--th) var(--ts) 32%), hsl(calc(var(--th) + 20) var(--ts) 9%)); }
+.launch h2 { font-family: var(--display); font-weight: 300; font-size: 190px; letter-spacing: -.04em; margin: 0; line-height: 1; }
+.launch p { font-size: 30px; color: rgb(255 255 255 / .75); margin: 28px 0 0; }
+.bar { width: 420px; height: 6px; border-radius: 3px; background: rgb(255 255 255 / .2); margin: 48px auto 0; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: #fff; }
+.launch.go .bar i { width: 100%; transition: width 1100ms cubic-bezier(.4,0,.2,1); }
+.source { background: #050507; }
+.source .chip { position: absolute; left: 96px; top: 72px; display: flex; gap: 16px; align-items: center; font-family: var(--mono); font-size: 26px;
+  border: 1px solid var(--line); border-radius: 12px; padding: 16px 22px; background: rgb(255 255 255 / .04); }
+.source .msg { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: var(--mute); font-size: 30px; }
+.source .msg b { display: block; font-family: var(--display); font-weight: 300; font-size: 96px; color: var(--fg); margin-bottom: 16px; }
+
+/* quick options */
+.sheet { background: rgb(4 4 7 / .62); }
+.sheet .panel { position: absolute; right: 0; top: 0; bottom: 0; width: 640px; background: var(--ink-2); border-left: 1px solid var(--line); padding: 72px 52px; box-sizing: border-box; animation: slide .3s cubic-bezier(.2,.7,.2,1); }
+@keyframes slide { from { transform: translateX(40px); opacity: 0; } }
+.panel h3 { font-family: var(--mono); font-size: 20px; letter-spacing: .1em; text-transform: uppercase; margin: 0; color: var(--mute); }
+.panel h4 { font-family: var(--display); font-weight: 400; font-size: 54px; margin: 8px 0 34px; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opt { font-size: 27px; padding: 15px 22px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; }
+.opt small { font-size: 20px; opacity: .6; }
+.opt.focus { background: var(--fg); color: var(--ink); }
+.opt.danger { color: var(--danger); }
+.opt.danger.focus { background: var(--danger); color: #210; }
+
+/* Lumen Settings */
+.settings { display: grid; grid-template-columns: 540px minmax(0, 1fr); background: var(--ink); }
+.snav { background: var(--ink-2); border-right: 1px solid var(--line); padding: 68px 40px; display: flex; flex-direction: column; gap: 4px; }
+.snav h2 { font-family: var(--display); font-weight: 300; font-size: 58px; letter-spacing: -.02em; margin: 0; }
+.snav .sub { color: var(--mute); font-size: 20px; margin: 4px 0 30px 2px; }
+.navi { font-size: 26px; padding: 15px 22px; border-radius: 12px; color: var(--mute); cursor: pointer; display: flex; align-items: center; gap: 16px; }
+.navi svg { width: 26px; height: 26px; flex: none; }
+.navi.sel { color: var(--fg); background: rgb(255 255 255 / .06); }
+.navi.focus { background: var(--fg); color: var(--ink); }
+.snav .foot { margin-top: auto; font-family: var(--mono); font-size: 15px; color: var(--mute); letter-spacing: .05em; }
+.spane { position: relative; overflow: hidden; padding: 68px 96px 0; }
+.crumb { font-family: var(--mono); font-size: 18px; color: var(--mute); letter-spacing: .1em; text-transform: uppercase; }
+.spane h3 { font-family: var(--display); font-weight: 400; font-size: 54px; letter-spacing: -.02em; margin: 6px 0 12px; }
+.note { font-size: 21px; color: var(--mute); max-width: 1000px; margin: 0 0 26px; line-height: 1.4; }
+.sview { position: absolute; left: 96px; right: 96px; top: 250px; bottom: 40px; overflow: hidden; }
+.srows { display: flex; flex-direction: column; gap: 6px; transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+.srow { display: flex; align-items: center; gap: 20px; font-size: 26px; padding: 17px 24px; border-radius: 14px; min-height: 40px; cursor: pointer; }
+.srow .v { margin-left: auto; color: var(--mute); display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.srow.focus { background: var(--fg); color: var(--ink); }
+.srow.focus .v { color: #56535f; }
+.srow.head { font-family: var(--mono); font-size: 17px; letter-spacing: .1em; text-transform: uppercase; color: var(--mute); padding: 22px 24px 6px; min-height: 0; cursor: default; }
+.srow.danger { color: var(--danger); }
+.srow.danger.focus { background: var(--danger); color: #210; }
+.srow.grab { outline: 3px dashed var(--accent); outline-offset: -3px; }
+.srow .idx { font-family: var(--mono); font-size: 18px; color: var(--mute); width: 34px; }
+.sw { width: 58px; height: 32px; border-radius: 16px; background: var(--line); position: relative; flex: none; }
+.sw::after { content: ""; position: absolute; left: 4px; top: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--mute); transition: transform .2s; }
+.sw.on { background: var(--accent); }
+.sw.on::after { transform: translateX(26px); background: #fff; }
+.cyc::before { content: "‹"; margin-right: 12px; opacity: .5; }
+.cyc::after { content: "›"; margin-left: 12px; opacity: .5; }
+.chev::after { content: "›"; font-size: 32px; line-height: 0; }
+.thumb { width: 72px; height: 42px; border-radius: 8px; background: var(--ink-3) center / cover no-repeat; border: 1px solid var(--line); }
+.srow input { font: inherit; font-size: 24px; background: var(--ink-3); color: var(--fg); border: 2px solid var(--accent); border-radius: 10px; padding: 8px 14px; width: 560px; }
+.srow textarea { font-family: var(--mono); font-size: 15px; width: 100%; height: 330px; background: var(--ink-3); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; padding: 16px; box-sizing: border-box; resize: none; }
+.srow.area { display: block; padding: 8px; }
+.srow.area.focus { background: transparent; outline: 3px solid var(--fg); }
+
+.dimmer { background: rgb(0 0 0 / .86); display: grid; place-content: center; text-align: center; }
+.dimmer b { font-family: var(--display); font-weight: 300; font-size: 220px; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.dimmer span { display: block; color: var(--mute); font-size: 28px; }
+
+.hints { position: absolute; right: 96px; bottom: 22px; display: flex; gap: 22px; font-size: 17px; color: var(--mute); z-index: 30; }
+.hints kbd { font-family: var(--mono); font-size: 14px; color: var(--fg); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; margin-right: 6px; background: var(--ink); }
+.toast { position: absolute; left: 50%; top: 40px; transform: translate(-50%, -20px); opacity: 0; z-index: 40; background: var(--fg); color: var(--ink); font-weight: 600;
+  font-size: 22px; padding: 14px 26px; border-radius: 999px; transition: opacity .25s, transform .25s; pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.reduce * { transition-duration: 0s !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0s !important; animation: none !important; } }
+</style>
+
+<div id="viewport">
+  <div class="stage" id="stage">
+    <div class="bgimg" id="bgimg"></div>
+    <div class="glow" id="glow"><div></div><div></div></div>
+    <div class="vignette"></div>
+    <div id="page">
+      <div class="top">
+        <div class="place"><i></i><span id="tvName">Bedroom TV</span></div>
+        <div class="weather" id="weather"></div>
+        <span class="tag" id="protoTag">PREVIEW</span>
+        <div class="spacer"></div>
+        <button class="pill" id="pAll" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>All apps</button>
+        <button class="pill" id="pLumen" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Lumen Settings</button>
+        <button class="pill" id="pTv" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></svg>TV Settings</button>
+        <div class="clock"><b id="time">--:--</b><span id="date"></span></div>
+      </div>
+      <section class="hero" id="hero">
+        <div class="kicker fd" id="kicker"></div>
+        <h1 id="title"></h1>
+        <p class="fd" id="meta"></p>
+      </section>
+      <div id="shelves"></div>
+      <section class="inputs sec" id="inputs">
+        <div class="label">Inputs <small>Hold OK on a card for options</small></div>
+        <div class="dock" id="dock"></div>
+      </section>
+    </div>
+    <div class="peek" id="peek"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>Inputs</div>
+    <div class="hints" id="hints"></div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+<input type="file" id="filePick" accept="image/*" hidden>
+
+<script>
+/* =====================================================================
+   BRIDGE. On the TV, a small Android shell loads this page in a WebView and
+   injects window.LumenAndroid:
+     getApps()     -> JSON [{id, name, pkg, icon}]   PackageManager (LEANBACK_LAUNCHER); icon = the app's real icon
+     getRecents()  -> JSON {id: lastUsedMs}          UsageStatsManager
+     launch(pkg) · switchInput(portId) · openSettings()
+   Without the shell (this preview) every call is answered with sample data.
+===================================================================== */
+const AND = window.LumenAndroid;
+const NOW = Date.now(), H = 3600e3;
+const SAMPLE_APPS = [
+  ["youtube","YouTube","com.google.android.youtube.tv",6,62], ["netflix","Netflix","com.netflix.ninja",352,58],
+  ["hbomax","HBO Max","com.wbd.stream",262,58], ["prime","Prime Video","com.amazon.amazonvideo.livingroom",198,62],
+  ["appletv","Apple TV","com.apple.atve.androidtv.appletv",240,6], ["crunchyroll","Crunchyroll","com.crunchyroll.crunchyroid",24,72],
+  ["disney","Disney+","com.disney.disneyplus",230,62], ["tcltv","TCL TV+","com.tcl.tv.plus",190,40],
+  ["espn","ESPN","com.espn.score_center",0,50], ["fox","Fox One","com.fox.foxone",222,48],
+  ["peacock","Peacock","com.peacocktv.peacockandroid",168,40], ["mlb","MLB","com.bamnetworks.mobile.android.gameday.atbat",216,58],
+  ["nfl","NFL","com.gotv.nflgamecenter.us.lite",234,52], ["cbs","CBS","com.cbs.tve",206,46],
+  ["ytmusic","YouTube Music","com.google.android.youtube.tvmusic",338,50], ["googletv","Google TV","com.google.android.videos",186,46],
+  ["media","Media Center","com.tcl.ui_mediaCenter",280,30], ["play","Play Store","com.android.vending",150,42],
+  ["tvbro","TV Bro","com.phlox.tvwebbrowser",40,52],
+].map(([id, name, pkg, h, s]) => ({ id, name, pkg, h, s }));
+const SAMPLE_RECENTS = { youtube: NOW - .6*H, crunchyroll: NOW - 3*H, netflix: NOW - 20*H, espn: NOW - 27*H, mlb: NOW - 50*H, disney: NOW - 120*H };
+const hashHue = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7);
+const KNOWN = Object.fromEntries(SAMPLE_APPS.map(a => [a.pkg, a]));
+const TV = {
+  apps: () => AND ? JSON.parse(AND.getApps()).map(a => KNOWN[a.pkg] ? { ...KNOWN[a.pkg], icon: a.icon }
+    : { id: a.pkg, name: a.name, pkg: a.pkg, h: hashHue(a.name), s: 45, icon: a.icon }) : SAMPLE_APPS,
+  recents: () => { if (!AND) return null; const r = JSON.parse(AND.getRecents() || "{}"), o = {}; for (const [pkg, t] of Object.entries(r)) o[KNOWN[pkg]?.id || pkg] = t; return o; },
+  inputs: () => AND && AND.getInputs ? JSON.parse(AND.getInputs()) : null,
+  launch: pkg => AND && pkg && AND.launch(pkg),
+  input: p => AND && AND.switchInput(p.label),
+  settings: () => AND && AND.openSettings(),
+  keyboard: () => AND && AND.showKeyboard && AND.showKeyboard(),
+};
+if (AND) document.documentElement.classList.add("device");
+
+/* ===================================================================== config */
+const DEFAULTS = {
+  v: 2, tvName: "Bedroom TV",
+  recents: { on: true, count: 4, exclude: [] },
+  hero: true, density: 8, names: true, namePos: "top",
+  sections: [
+    { id: "streaming", name: "Streaming Apps", home: true, apps: ["youtube","netflix","hbomax","prime","appletv","crunchyroll","disney","tcltv"] },
+    { id: "sports", name: "Sports", home: true, apps: ["espn","fox","peacock","mlb","nfl","cbs"] },
+    { id: "media", name: "Music & Media", home: false, apps: ["ytmusic","googletv","media"] },
+    { id: "tools", name: "Tools", home: false, apps: ["play","tvbro"] },
+  ],
+  hidden: [], logos: {},
+  ports: [
+    { id: "hdmi1", label: "HDMI 1", name: "Switch 2", brand: "Nintendo", style: "red", earc: false, other: true, img: null, live: true },
+    { id: "hdmi2", label: "HDMI 2", name: "", brand: "", style: "ambient", earc: false, other: true, img: null, live: false },
+    { id: "hdmi3", label: "HDMI 3", name: "Apple TV", brand: "Apple", style: "mono", earc: false, other: true, img: null, live: true },
+    { id: "hdmi4", label: "HDMI 4", name: "SONY HTC-390", brand: "Sony", style: "ambient", earc: true, other: true, img: null, live: true },
+  ],
+  featured: ["hdmi3", "hdmi1"], airplay: true, otherTile: true,
+  ambient: { on: true, level: "medium", color: "app" },
+  bg: { mode: "ambient", img: null },
+  stroke: { on: true, trail: true, speed: "normal" },
+  corners: "rounded", accent: "amber",
+  weather: { on: true, loc: "Milwaukee, WI", lat: 43.0389, lon: -87.9065, unit: "F" },
+  clock24: false, showDate: true,
+  fps: 60, fade: "normal", reduce: false,
+  start: "recents", idle: 10, hold: true, backHome: "first",
+  titleAnim: "letters", homeBtn: "top", hintsOn: true,
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("lumen:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("lumen:" + k, JSON.stringify(v)); return true; } catch { return false; } },
+};
+function merge(saved) {
+  const c = clone(DEFAULTS); if (!saved || typeof saved !== "object") return c;
+  for (const k of Object.keys(saved)) {
+    if (!(k in c)) continue;
+    const d = c[k], v = saved[k];
+    c[k] = d && typeof d === "object" && !Array.isArray(d) && v && typeof v === "object" && !Array.isArray(v) ? { ...d, ...v } : v;
+  }
+  if (!(saved.v >= 2)) c.fps = 60;   // v2: smoother default
+  c.v = DEFAULTS.v;
+  return c;
+}
+let cfg = merge(store.get("cfg", null));
+const mergeRecents = (a, b) => { const o = { ...a }; for (const [k, t] of Object.entries(b || {})) o[k] = Math.max(o[k] || 0, t); return o; };
+let lastUsed = AND ? mergeRecents(store.get("recents", {}), TV.recents()) : store.get("recents", SAMPLE_RECENTS);
+function syncInputs() {
+  const list = TV.inputs(); if (!list) return;
+  for (const p of cfg.ports) { const n = (p.label.match(/\d+/) || [])[0];
+    const hit = list.find(i => /hdmi/i.test(i.label) && (i.label.match(/\d+/) || [])[0] === n); if (hit) p.live = hit.state !== 2; }
+}
+function save() { if (!store.set("cfg", cfg)) toast("Couldn't save. Storage is full, try a smaller image."); store.set("recents", lastUsed); }
+
+const apps = TV.apps();
+const byId = Object.fromEntries(apps.map(a => [a.id, a]));
+const ACCENTS = { amber: "#f0b27a", ice: "#9fd0ff", mint: "#8fe3c0", rose: "#f5a6c4" };
+const CORNERS = { rounded: 1, soft: .6, square: .2 };
+const FADES = { slow: 1200, normal: 700, fast: 380 };
+const LEVELS = { low: .5, medium: .8, high: 1 };
+const FIXED = { violet: 262, blue: 215, teal: 178, amber: 32, rose: 338 };
+
+/* ===================================================================== helpers */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const stage = $("#stage"), page = $("#page");
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("on"), 2200); }
+function ago(t) {
+  if (!t) return "Not opened yet";
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 2) return "Opened just now"; if (m < 60) return `Opened ${m} min ago`;
+  const h = Math.round(m / 60); if (h < 24) return `Opened ${h} hour${h > 1 ? "s" : ""} ago`;
+  const d = Math.round(h / 24); return d === 1 ? "Opened yesterday" : `Opened ${d} days ago`;
+}
+const portById = id => cfg.ports.find(p => p.id === id);
+const portName = p => p.name || "Unassigned";
+const portLine = p => `${p.label}${p.earc ? " (eARC)" : ""} – ${portName(p)}`;
+const sectionOf = id => cfg.sections.find(s => s.apps.includes(id));
+function rel(node, root) { let x = 0, y = 0, e = node; while (e && e !== root) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x, y, w: node.offsetWidth, h: node.offsetHeight }; }
+function logoHTML(a) { const src = cfg.logos[a.id] || a.icon; return src ? `<img src="${esc(src)}" alt="">` : esc(a.name[0]); }
+function tile(a, size) {
+  const t = el("div", "tile " + size, `<span class="sheen"></span><span class="logo">${logoHTML(a)}</span><span class="nm">${esc(a.name)}</span>`);
+  t.style.setProperty("--th", a.h); t.style.setProperty("--ts", a.s + "%"); return t;
+}
+const JACK = `<span class="jack"></span>`;
+const WAVE = `<svg class="wave" viewBox="0 0 56 28"><path d="M3 14h4M12 8v12M20 3v22M28 9v10M36 5v18M44 10v8M52 13v2" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" fill="none"/></svg>`;
+const CAST = `<svg class="gl" viewBox="0 0 70 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M22 33a18 18 0 0 1 26 0M14 25a29 29 0 0 1 42 0M6 17a40 40 0 0 1 58 0"/><circle cx="35" cy="37" r="2.5" fill="currentColor"/></svg>`;
+
+/* ===================================================================== ambient light + stroke */
+const glowLayers = [...document.querySelectorAll("#glow > div")]; let glowIdx = 0, glowHue = null;
+function setGlow(h) {
+  if (cfg.ambient.color !== "app") h = FIXED[cfg.ambient.color];
+  stage.style.setProperty("--hk", h); stage.style.setProperty("--rh", h);
+  if (glowHue === h) return; glowHue = h;
+  const next = glowLayers[1 - glowIdx]; next.style.setProperty("--g", h);
+  next.classList.add("on"); glowLayers[glowIdx].classList.remove("on"); glowIdx = 1 - glowIdx;
+}
+const ring = { a: el("div", "ring"), b: el("div", "ring trail"), host: null, cur: null, tr: null, tgt: null };
+function ringHost(host) { if (ring.host !== host) { host.append(ring.b, ring.a); ring.host = host; ring.cur = null; } }
+function ringTo(node, scale, radius) {
+  if (!ring.host) return;
+  const r = rel(node, ring.host), gx = r.w * (scale - 1) / 2 + 8, gy = r.h * (scale - 1) / 2 + 8;
+  ring.tgt = { x: r.x - gx, y: r.y - gy, w: r.w + 2 * gx, h: r.h + 2 * gy, rad: radius * scale + 8 };
+  if (!ring.cur || cfg.reduce) { ring.cur = { ...ring.tgt }; ring.tr = { ...ring.tgt }; }
+  ring.a.hidden = !cfg.stroke.on; ring.b.hidden = !cfg.stroke.on || !cfg.stroke.trail;
+}
+function ringOff() { ring.a.hidden = ring.b.hidden = true; }
+const lerp = (c, t, k) => { for (const p of ["x", "y", "w", "h", "rad"]) c[p] += (t[p] - c[p]) * k; };
+const paint = (e, c) => { e.style.transform = `translate(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px)`; e.style.width = c.w.toFixed(1) + "px"; e.style.height = c.h.toFixed(1) + "px"; e.style.borderRadius = c.rad.toFixed(1) + "px"; };
+let lastFrame = 0;
+function frame(t) {
+  requestAnimationFrame(frame);
+  if (t - lastFrame < 1000 / cfg.fps - 2) return;                  // capped at 30 or 60 fps
+  const dt = Math.min(.05, (t - lastFrame) / 1000 || .016); lastFrame = t;
+  if (!ring.tgt || !ring.cur || ring.a.hidden) return;
+  // time-based easing: same speed at any frame rate, no stepping
+  const rate = { relaxed: 14, normal: 22, snappy: 32 }[cfg.stroke.speed] || 22;
+  const k = cfg.reduce ? 1 : 1 - Math.exp(-rate * dt), kt = cfg.reduce ? 1 : 1 - Math.exp(-rate * .42 * dt);
+  lerp(ring.cur, ring.tgt, k); lerp(ring.tr, ring.tgt, kt); paint(ring.a, ring.cur); paint(ring.b, ring.tr);
+}
+requestAnimationFrame(frame);
+
+/* ===================================================================== home */
+let rows = [], fr = 1, fc = 0, view = "home", heroKey = "";
+function recentIds() {
+  return Object.entries(lastUsed).filter(([id]) => byId[id] && !cfg.hidden.includes(id) && !cfg.recents.exclude.includes(id))
+    .sort((a, b) => b[1] - a[1]).map(([id]) => id).slice(0, cfg.recents.count);
+}
+function bindClick(item) { item.el.onclick = () => { if (view !== "home") return; const r = rows.findIndex(x => x.items.includes(item)); setFocus(r, rows[r].items.indexOf(item)); activate(); }; }
+function buildHome() {
+  const shelves = $("#shelves"); shelves.innerHTML = "";
+  rows = [{ items: [{ el: $("#pAll"), kind: "allapps", key: "t:all", pill: true }, { el: $("#pLumen"), kind: "lumen", key: "t:lumen", pill: true }, { el: $("#pTv"), kind: "tvset", key: "t:tv", pill: true }] }];
+  let lead = true;
+  if (cfg.recents.on) {
+    const ids = recentIds();
+    if (ids.length) {
+      const sec = el("section", "sec lead", `<div class="label">Recently used <small>Sorted by when you last opened them</small></div>`);
+      const row = el("div", "row big"); row.style.setProperty("--cols", cfg.recents.count); sec.append(row); shelves.append(sec); lead = false;
+      rows.push({ id: "recents", items: ids.map(id => { const t = tile(byId[id], "big"); row.append(t); return { el: t, kind: "app", data: byId[id], ctx: "recents", key: "r:" + id, scale: 1.06, rad: 22 }; }) });
+    }
+  }
+  const homeSecs = cfg.sections.map(s => ({ s, list: s.apps.filter(id => byId[id] && !cfg.hidden.includes(id)) })).filter(x => x.s.home && x.list.length);
+  homeSecs.forEach(({ s, list }, n) => {
+    const last = n === homeSecs.length - 1;
+    const sec = el("section", "sec" + (lead && !last ? " lead" : ""), `<div class="label">${esc(s.name)}</div>`);
+    const cols = Math.min(list.length, cfg.density);
+    const row = el("div", "row fill"); row.style.setProperty("--cols", cols); sec.append(row);
+    const items = list.map(id => { const t = tile(byId[id], "small"); row.append(t); return { el: t, kind: "app", data: byId[id], ctx: s.id, key: s.id + ":" + id, scale: 1.08, rad: 14 }; });
+    if (last) {
+      // All apps sits to the right of the last section as its own small section
+      const wrap = el("div", "pair" ), side = el("section", "sec", `<div class="label">Library</div>`), srow = el("div", "row fill"); srow.style.setProperty("--cols", 1);
+      const t = el("div", "tile small all", `<span class="logo"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="nm">All apps</span>`);
+      srow.append(t); side.append(srow); wrap.append(sec, side);
+      const outer = el("div", lead ? "" : "pairwrap"); outer.append(wrap); shelves.append(outer);
+      if (cols < list.length) wrap.style.gridTemplateColumns = "minmax(0, 6fr) minmax(0, 1fr)";
+      items.push({ el: t, kind: "allapps", key: "t:alltile", scale: 1.08, rad: 14 });
+    } else shelves.append(sec);
+    lead = false;
+    rows.push({ id: s.id, items });
+  });
+  const dock = $("#dock"); dock.innerHTML = ""; const items = [];
+  for (const pid of cfg.featured) {
+    const p = portById(pid); if (!p) continue;
+    const c = el("div", `incard st-${p.style}${p.live ? " live" : ""}`,
+      `<div class="k">${esc(p.brand ? p.brand + " · " : "")}${p.label}${p.earc ? " · eARC" : ""}</div><div class="n">${esc(portName(p))}</div>
+       <div class="s"><span class="sigdot"></span>${p.live ? "Signal" : "No signal"}</div><div class="glyph">${JACK}</div>`);
+    if (p.style === "image" && p.img) c.style.backgroundImage = `url("${p.img}")`;
+    c.style.setProperty("--g0", 30); dock.append(c); items.push({ el: c, kind: "featured", data: p, key: "f:" + p.id, scale: 1.05, rad: 22 });
+  }
+  if (cfg.otherTile) {
+    const n = cfg.ports.filter(p => p.other).length;
+    const c = el("div", "incard st-other", `<div class="k">Inputs</div><div class="n">Other sources</div>
+      <div class="s">${n} HDMI${cfg.airplay ? " · AirPlay" : ""}</div><div class="glyph jacks">${'<span class="jack sm"></span>'.repeat(Math.min(n, 4))}</div>`);
+    dock.append(c); items.push({ el: c, kind: "other", key: "f:other", scale: 1.05, rad: 22 });
+  }
+  dock.style.setProperty("--dcols", Math.max(3, items.length));
+  $("#inputs").hidden = !items.length;
+  if (items.length) rows.push({ id: "inputs", items });
+  rows.forEach(r => { r.items.forEach(bindClick); r.items.forEach(i => { i.scale ??= 1.07; i.rad ??= 30; }); });
+}
+function focusKey() { return rows[fr]?.items[fc]?.key; }
+function restoreFocus(key) {
+  for (let r = 0; r < rows.length; r++) { const c = rows[r].items.findIndex(i => i.key === key); if (c >= 0) return setFocus(r, c); }
+  startFocus();
+}
+function startFocus() {
+  let r = rows.findIndex(x => x.id === "recents");
+  if (cfg.start === "section" || r < 0) r = rows.findIndex((x, i) => i > 0 && x.id !== "recents" && x.id !== "inputs");
+  setFocus(r < 0 ? 0 : r, 0);
+}
+function setFocus(r, c) {
+  rows.forEach(x => x.items.forEach(i => i.el.classList.remove("focus")));
+  fr = r; fc = Math.max(0, Math.min(c, rows[r].items.length - 1));
+  const it = rows[fr].items[fc]; it.el.classList.add("focus");
+  const onInputs = rows[fr].id === "inputs", sec = $("#inputs");
+  const shift = onInputs ? Math.max(0, sec.offsetTop + sec.offsetHeight + 40 - 1080) : 0;
+  page.style.transform = `translateY(${-shift}px)`; $("#peek").style.opacity = onInputs || !sec.offsetHeight ? 0 : 1;
+  ringHost(page);
+  if (it.pill) ringOff(); else ringTo(it.el, it.scale, it.rad * CORNERS[cfg.corners]);
+  updateHero(it);
+}
+function updateHero(it) {
+  let k, t, m, h;
+  if (it.kind === "app") {
+    const sec = cfg.sections.find(s => s.id === it.ctx);
+    k = it.ctx === "recents" ? "Recently used" : sec ? sec.name : ""; t = it.data.name;
+    m = ago(lastUsed[it.data.id]) + (cfg.hold ? " · Hold OK for options" : ""); h = it.data.h;
+  } else if (it.kind === "allapps") { k = "Library"; t = "All apps"; m = `${apps.length - cfg.hidden.length} apps in ${cfg.sections.length} categories`; h = 255; }
+  else if (it.kind === "lumen") { k = "Customize"; t = "Lumen Settings"; m = "Layout, sections, inputs, look and motion"; h = 285; }
+  else if (it.kind === "tvset") { k = "System"; t = "TV Settings"; m = "Opens the TV's own settings: picture, sound, network"; h = 215; }
+  else if (it.kind === "featured") { const p = it.data; k = `Input · ${p.label}${p.earc ? " · eARC" : ""}`; t = portName(p); m = (p.live ? "Signal detected" : "No signal") + " · Press OK to switch"; h = p.style === "red" ? 356 : p.style === "mono" ? 225 : 30; }
+  else { k = "Inputs"; t = "Other sources"; m = "Every HDMI port, plus AirPlay"; h = 30; }
+  setGlow(h);
+  const key = k + t + m; if (key === heroKey) return;
+  const first = !heroKey; heroKey = key;
+  const hero = $("#hero"); hero.style.setProperty("--dx", heroDir[0]); hero.style.setProperty("--dy", heroDir[1]);
+  if (first) { $("#kicker").textContent = k; $("#meta").textContent = m; return setTitle(t); }
+  hero.classList.add("swap"); if ($("#title").textContent !== t) $("#title").classList.add("leaving");
+  clearTimeout(hero._t); hero._t = setTimeout(() => { $("#kicker").textContent = k; $("#meta").textContent = m; if ($("#title").textContent !== t || !$("#title").firstChild) setTitle(t); else $("#title").classList.remove("leaving"); hero.classList.remove("swap"); }, 110);
+}
+let heroDir = [1, 0];
+function setTitle(text) {
+  const h = $("#title"), mode = cfg.reduce ? "fade" : cfg.titleAnim;
+  h.className = mode === "off" ? "" : "anim-" + mode;
+  if (mode === "off") { h.textContent = text; return; }
+  const parts = mode === "letters" ? [...text] : [text];
+  h.innerHTML = parts.map((c, i) => `<span style="--i:${Math.min(i, 20)}">${esc(c)}</span>`).join("");
+}
+function nearest(items, x) { let best = 0, bd = 1e9; items.forEach((i, n) => { const r = rel(i.el, ring.host || page); const d = Math.abs(r.x + r.w / 2 - x); if (d < bd) { bd = d; best = n; } }); return best; }
+function hints(list) { $("#hints").hidden = !cfg.hintsOn; $("#hints").innerHTML = list.map(([k, v]) => `<span><kbd>${k}</kbd>${v}</span>`).join(""); }
+const homeHints = () => hints([["←↑↓→", "Move"], ["OK", "Open"], ...(cfg.hold ? [["Hold OK", "Options"]] : []), ["Back", "Home"]]);
+
+/* ===================================================================== activation + overlays */
+let layer = null;
+function openLayer(node, v) { closeLayer(); stage.append(node); layer = node; view = v; }
+function closeLayer() { if (layer) layer.remove(); layer = null; view = "home"; ringHost(page); homeHints(); }
+function goHome(refocus = true) {
+  const key = focusKey(); closeLayer(); buildHome();
+  if (refocus === "first") startFocus(); else restoreFocus(key);
+}
+function activate() {
+  const it = current(); if (!it) return;
+  if (it.kind === "app") return openApp(it.data);
+  if (it.kind === "allapps") return openAll();
+  if (it.kind === "lumen") return openSettings();
+  if (it.kind === "tvset") return openApp({ id: "tv", name: "TV Settings", h: 215, s: 12 }, () => TV.settings(), "The TV's own settings would open now.");
+  if (it.kind === "featured" || it.kind === "port") return openInput(it.data);
+  if (it.kind === "air") return openApp({ id: "air", name: "AirPlay", h: 210, s: 20, pkg: "com.tcl.airplay2" }, null, "Ready for AirPlay from an iPhone, iPad or Mac.");
+  if (it.kind === "other") return openOther();
+}
+function openApp(a, run, msg) {
+  const L = el("div", "layer launch", `<div><h2>${esc(a.name)}</h2><p>Opening…</p><div class="bar"><i></i></div></div>`);
+  L.style.setProperty("--th", a.h); L.style.setProperty("--ts", a.s + "%");
+  openLayer(L, "app"); ringOff(); requestAnimationFrame(() => requestAnimationFrame(() => L.classList.add("go")));
+  run ? run() : TV.launch(a.pkg);
+  if (byId[a.id]) { lastUsed[a.id] = Date.now(); save(); }
+  if (!AND) setTimeout(() => { if (layer === L) L.querySelector("p").textContent = msg || `${a.name} would be running now. Press Back to return home.`; }, 1200);
+  hints([["Back", "Return home"]]);
+}
+function openInput(p) {
+  const L = el("div", "layer source", `<div class="chip"><span class="sigdot" style="background:var(--accent);opacity:1"></span>${esc(portLine(p))}</div>
+    <div class="msg"><div><b>${esc(portName(p))}</b>${p.live ? "The picture from this device would show here." : "No signal on this input."}</div></div>`);
+  openLayer(L, "app"); ringOff(); TV.input(p); hints([["Back", "Return home"]]);
+}
+
+/* ---- grid overlays (All apps, Other sources) share one navigator */
+let grid = null; // { rows:[[item]], r, c, inner, scroller }
+function gridFocus(r, c) {
+  const g = grid; g.rows.flat().forEach(i => i.el.classList.remove("focus"));
+  g.r = Math.max(0, Math.min(r, g.rows.length - 1)); g.c = Math.max(0, Math.min(c, g.rows[g.r].length - 1));
+  const it = g.rows[g.r][g.c]; it.el.classList.add("focus");
+  const top = rel(it.el, g.inner).y, max = Math.max(0, g.inner.offsetHeight - g.scroller.offsetHeight);
+  g.inner.style.transform = `translateY(${-Math.min(max, Math.max(0, top - 140))}px)`;
+  ringTo(it.el, it.scale, it.rad * CORNERS[cfg.corners]);
+  setGlow(it.data?.h ?? (it.kind === "air" ? 210 : it.data?.earc ? 32 : 30));
+  if (g.onFocus) g.onFocus(it);
+}
+function openAll() {
+  const visible = apps.filter(a => !cfg.hidden.includes(a.id));
+  const L = el("div", "layer solid", `<div class="ov-head"><h2>All apps</h2><span id="allSub"></span></div><div class="scroller"><div class="inner"></div></div>`);
+  openLayer(L, "grid");
+  const inner = L.querySelector(".inner"), groups = [];
+  for (const s of cfg.sections) groups.push([s.name, s.apps.filter(id => visible.some(a => a.id === id)).map(id => byId[id]), s.id]);
+  const loose = visible.filter(a => !sectionOf(a.id)).sort((a, b) => a.name.localeCompare(b.name));
+  if (loose.length) groups.push(["Other apps", loose, null]);
+  const navRows = [];
+  for (const [name, list, sid] of groups) {
+    if (!list.length) continue;
+    const sec = el("section", "sec", `<div class="label">${esc(name)} <small>${list.length}</small></div>`); const row = el("div", "row"); row.style.setProperty("--cols", cfg.density);
+    sec.append(row); inner.append(sec);
+    const items = list.map(a => { const t = tile(a, "small"); row.append(t); return { el: t, kind: "app", data: a, ctx: sid, scale: 1.12, rad: 14 }; });
+    for (let i = 0; i < items.length; i += cfg.density) navRows.push(items.slice(i, i + cfg.density));
+  }
+  $("#allSub").textContent = `${visible.length} APPS · ${groups.filter(g => g[1].length).length} CATEGORIES`;
+  grid = { rows: navRows, inner, scroller: L.querySelector(".scroller") };
+  navRows.flat().forEach(i => i.el.onclick = () => { const r = navRows.findIndex(x => x.includes(i)); gridFocus(r, navRows[r].indexOf(i)); activate(); });
+  ringHost(inner); ring.cur = null; if (navRows.length) gridFocus(0, 0); else inner.append(el("p", "note", "Every app is hidden. Show them again in Lumen Settings → Sections & apps."));
+  hints([["←↑↓→", "Move"], ["OK", "Open"], ...(cfg.hold ? [["Hold OK", "Options"]] : []), ["Back", "Home"]]);
+}
+function openOther() {
+  const L = el("div", "layer solid", `<div class="ov-head"><h2>Other sources</h2><span>NAMES MATCH YOUR HOME SCREEN</span></div><div class="scroller"><div class="inner"><div class="ports"></div></div></div>`);
+  openLayer(L, "grid");
+  const inner = L.querySelector(".inner"), box = L.querySelector(".ports"), items = [];
+  for (const p of cfg.ports.filter(p => p.other)) {
+    const c = el("div", `port${p.earc ? " earc" : ""}${p.name ? "" : " unassigned"}${p.live ? " live" : ""}`,
+      `${JACK}<span class="sigdot"></span><div class="id">${p.label}${p.earc ? '<span class="badge">eARC</span>' : ""}</div><div class="pn">${esc(portName(p))}</div>
+       <div class="foot">${p.earc ? "Audio return to soundbar" : p.live ? "Signal" : "No signal"}</div>${p.earc ? WAVE : ""}`);
+    box.append(c); items.push({ el: c, kind: "port", data: p, scale: 1.05, rad: 20 });
+  }
+  if (cfg.airplay) { const c = el("div", "port air", `${CAST}<div class="id">AirPlay</div><div class="pn">From iPhone or Mac</div><div class="foot">Wireless</div>`); box.append(c); items.push({ el: c, kind: "air", scale: 1.05, rad: 20 }); }
+  box.style.setProperty("--pc", Math.max(4, items.length));
+  if (!items.length) { box.outerHTML = `<p class="note">Every source is hidden. Turn some back on in Lumen Settings → Inputs.</p>`; }
+  grid = { rows: [items], inner, scroller: L.querySelector(".scroller"),
+    onFocus: it => { /* keep hero logic local: nothing */ } };
+  items.forEach(i => i.el.onclick = () => { gridFocus(0, items.indexOf(i)); activate(); });
+  ringHost(inner); ring.cur = null; if (items.length) gridFocus(0, 0);
+  hints([["← →", "Move"], ["OK", "Switch"], ...(cfg.hold ? [["Hold OK", "Options"]] : []), ["Back", "Home"]]);
+}
+function current() { return view === "grid" ? grid?.rows[grid.r]?.[grid.c] : view === "home" ? rows[fr]?.items[fc] : null; }
+
+/* ===================================================================== quick options (hold OK) */
+let sheet = null, sheetPrev = null;
+function openSheet(kicker, title, opts) {
+  if (sheet) sheet.remove();
+  sheetPrev = sheetPrev || view;
+  sheet = el("div", "layer sheet", `<div class="panel"><h3>${esc(kicker)}</h3><h4>${esc(title)}</h4><div class="opts"></div></div>`);
+  stage.append(sheet); view = "sheet";
+  const box = sheet.querySelector(".opts");
+  sheet.opts = opts.map((o, i) => { const e = el("div", "opt" + (o.danger ? " danger" : ""), esc(o.label) + (o.small ? `<small>${esc(o.small)}</small>` : "")); box.append(e); e.onclick = () => { setOpt(i); pickOpt(); }; return { ...o, el: e }; });
+  setOpt(0); hints([["↑↓", "Choose"], ["OK", "Select"], ["Back", "Cancel"]]);
+}
+function setOpt(i) { const o = sheet.opts; sheet.i = (i + o.length) % o.length; o.forEach(x => x.el.classList.remove("focus")); o[sheet.i].el.classList.add("focus"); }
+function closeSheet() { if (sheet) sheet.remove(); sheet = null; view = sheetPrev || "home"; sheetPrev = null; if (view === "settings") renderSettings(); else if (view === "home") homeHints(); else hints([["←↑↓→", "Move"], ["OK", "Open"], ["Back", "Home"]]); }
+function pickOpt() { const o = sheet.opts[sheet.i]; if (o.sub) return o.sub(); closeSheet(); o.run && o.run(); }
+function commit(msg) { save(); const wasGrid = view === "grid", kind = wasGrid ? (layer.querySelector(".ports") ? "other" : "all") : null; const key = focusKey(); applyCfg(); if (wasGrid) { kind === "all" ? openAll() : openOther(); } else restoreFocus(key); if (msg) toast(msg); }
+function moveIn(arr, id, d) { const i = arr.indexOf(id), j = i + d; if (i < 0 || j < 0 || j >= arr.length) return false; [arr[i], arr[j]] = [arr[j], arr[i]]; return true; }
+function quickOptions(it) {
+  if (it.kind === "app") {
+    const a = it.data, sec = sectionOf(a.id);
+    const opts = [];
+    if (sec) opts.push({ label: "Move earlier", small: sec.name, run: () => { moveIn(sec.apps, a.id, -1) ? commit("Moved") : toast("Already first"); } },
+                       { label: "Move later", small: sec.name, run: () => { moveIn(sec.apps, a.id, 1) ? commit("Moved") : toast("Already last"); } });
+    opts.push({ label: "Move to section…", sub: () => openSheet(a.name, "Move to…", [
+      ...cfg.sections.map(s => ({ label: s.name, small: s === sec ? "Current" : "", run: () => { cfg.sections.forEach(x => x.apps = x.apps.filter(i => i !== a.id)); s.apps.push(a.id); commit(`Moved to ${s.name}`); } })),
+      { label: "No section", run: () => { cfg.sections.forEach(x => x.apps = x.apps.filter(i => i !== a.id)); commit("Removed from sections"); } }]) });
+    if (it.ctx === "recents" || lastUsed[a.id]) opts.push({ label: "Remove from Recently used", run: () => { delete lastUsed[a.id]; commit("Removed from Recently used"); } });
+    opts.push({ label: "Set custom logo image…", run: () => pickImage(256, url => { cfg.logos[a.id] = url; commit("Logo updated"); }) });
+    if (cfg.logos[a.id]) opts.push({ label: "Use the app's own logo", run: () => { delete cfg.logos[a.id]; commit("Logo reset"); } });
+    opts.push({ label: "Hide app everywhere", danger: true, run: () => { cfg.hidden.push(a.id); commit(`${a.name} hidden. Undo in Lumen Settings`); } });
+    return openSheet(sec ? sec.name : "App", a.name, opts);
+  }
+  if (it.kind === "featured" || it.kind === "port") {
+    const p = it.data, feat = cfg.featured.includes(p.id), styles = ["mono", "red", "ambient", "image"];
+    const opts = [];
+    if (it.kind === "featured") opts.push({ label: "Move earlier", run: () => moveIn(cfg.featured, p.id, -1) ? commit("Moved") : toast("Already first") },
+                                          { label: "Move later", run: () => moveIn(cfg.featured, p.id, 1) ? commit("Moved") : toast("Already last") });
+    opts.push({ label: feat ? "Remove from home screen" : "Show on home screen", run: () => { feat ? cfg.featured = cfg.featured.filter(x => x !== p.id) : cfg.featured.push(p.id); commit(); } },
+      { label: "Card style", small: STYLE_NAMES[p.style], run: () => { p.style = styles[(styles.indexOf(p.style) + 1) % styles.length]; commit("Style: " + STYLE_NAMES[p.style]); } },
+      { label: "Card image…", run: () => pickImage(1024, url => { p.img = url; p.style = "image"; commit("Image set"); }) },
+      { label: "Rename and more", small: "Lumen Settings", run: () => openSettings(2, () => pgPort(p.id)) });
+    return openSheet(p.label + (p.earc ? " · eARC" : ""), portName(p), opts);
+  }
+}
+const STYLE_NAMES = { mono: "Silver", red: "Red", ambient: "Ambient", image: "Image" };
+
+/* ===================================================================== images */
+function pickImage(max, cb) {
+  const f = $("#filePick"); f.value = "";
+  f.onchange = () => {
+    const file = f.files[0]; if (!file) return;
+    const rd = new FileReader();
+    rd.onload = () => { const img = new Image(); img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      cb(c.toDataURL(max > 300 ? "image/jpeg" : "image/png", .85));
+    }; img.onerror = () => toast("That file isn't an image Lumen can read."); img.src = rd.result; };
+    rd.readAsDataURL(file);
+  };
+  f.click();
+}
+
+/* ===================================================================== Lumen Settings */
+const ICONS = {
+  home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  apps: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+  input: '<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 11h10"/>',
+  look: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>',
+  sky: '<circle cx="9" cy="10" r="4"/><path d="M7 19h10a4 4 0 0 0 0-8"/>',
+  motion: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  behave: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  backup: '<path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4M12 3v12M7 10l5 5 5-5"/>',
+};
+const T = (label, get, set) => ({ t: "toggle", label, get, set });
+const C = (label, opts, get, set) => ({ t: "choice", label, opts, get, set });
+const A = (label, run, value, more) => ({ t: "action", label, run, value, ...more });
+const X = (label, get, set, ph) => ({ t: "text", label, get, set, ph });
+const I = (label, get, set, max) => ({ t: "image", label, get, set, max });
+const HEAD = label => ({ t: "head", label });
+
+function pgHome() { return { crumb: "Lumen Settings", title: "Home screen", note: "What screen one shows, and how app tiles look.", rows: [
+  T("Show Recently used", () => cfg.recents.on, v => cfg.recents.on = v),
+  C("Recently used tiles", [[3, "3"], [4, "4"], [5, "5"], [6, "6"]], () => cfg.recents.count, v => cfg.recents.count = v),
+  A("Keep apps out of Recently used", () => push(pgExclude), `${cfg.recents.exclude.length} excluded`, { chev: true }),
+  A("Clear Recently used history", () => { lastUsed = {}; }, "", { confirm: true, danger: true }),
+  T("Show title above Recently used", () => cfg.hero, v => cfg.hero = v),
+  HEAD("App tiles"),
+  C("Most tiles per row", [[8, "8"], [10, "10"]], () => cfg.density, v => cfg.density = v),
+  T("Show app names", () => cfg.names, v => cfg.names = v),
+  C("Name position", [["top", "Top left"], ["bottom", "Bottom left"]], () => cfg.namePos, v => cfg.namePos = v),
+  A("Custom logo images", () => push(pgLogos), `${Object.keys(cfg.logos).length} set`, { chev: true }),
+] }; }
+function pgExclude() { return { crumb: "Home screen", title: "Keep out of Recently used", note: "These apps never appear in Recently used.", rows:
+  apps.map(a => T(a.name, () => cfg.recents.exclude.includes(a.id), v => { cfg.recents.exclude = cfg.recents.exclude.filter(x => x !== a.id); if (v) cfg.recents.exclude.push(a.id); })) }; }
+function pgLogos() { return { crumb: "Home screen", title: "Custom logo images", note: "On the TV each tile shows the app's own logo. Pick an image here to replace it.", rows:
+  apps.map(a => I(a.name, () => cfg.logos[a.id], v => { v ? cfg.logos[a.id] = v : delete cfg.logos[a.id]; }, 256)) }; }
+
+function pgSections() { return { crumb: "Lumen Settings", title: "Sections & apps", note: "Sections marked Home appear under Recently used. All apps shows every section.", rows: [
+  ...cfg.sections.map(s => A(s.name, () => push(() => pgSection(s.id)), `${s.apps.length} apps · ${s.home ? "Home" : "All apps only"}`, { chev: true })),
+  A("New section", () => { const id = "s" + Date.now().toString(36); cfg.sections.push({ id, name: "New section", home: false, apps: [] }); push(() => pgSection(id)); }, "", { chev: true }),
+  A("Reorder sections", () => push(pgSectionOrder), "", { chev: true }),
+  HEAD("Apps"),
+  A("Hidden apps", () => push(pgHidden), `${cfg.hidden.length} hidden`, { chev: true }),
+] }; }
+function pgSectionOrder() { return { crumb: "Sections & apps", title: "Reorder sections", note: "Press OK to pick up a section, move it with ↑ ↓, press OK to drop it.",
+  reorder: { get: () => cfg.sections.map(s => s.id), set: ids => cfg.sections = ids.map(id => cfg.sections.find(s => s.id === id)), label: id => cfg.sections.find(s => s.id === id).name } }; }
+function pgSection(id) {
+  const s = cfg.sections.find(x => x.id === id); if (!s) return pgSections();
+  return { crumb: "Sections & apps", title: s.name, rows: [
+    X("Name", () => s.name, v => s.name = v.trim() || s.name),
+    T("Show on home screen", () => s.home, v => s.home = v),
+    A("Reorder apps", () => push(() => ({ crumb: s.name, title: "Reorder apps", note: "Press OK to pick up an app, move it with ↑ ↓, press OK to drop it.",
+      reorder: { get: () => s.apps.filter(i => byId[i]), set: ids => s.apps = ids, label: i => byId[i].name } })), `${s.apps.length} apps`, { chev: true }),
+    A("Choose apps", () => push(() => ({ crumb: s.name, title: "Choose apps", note: "An app lives in one section. Turning one on here moves it.",
+      rows: apps.map(a => T(a.name, () => s.apps.includes(a.id), v => { cfg.sections.forEach(x => x.apps = x.apps.filter(i => i !== a.id)); if (v) s.apps.push(a.id); })) })), "", { chev: true }),
+    A("Delete section", () => { cfg.sections = cfg.sections.filter(x => x !== s); pop(); }, "Apps move to Other apps", { confirm: true, danger: true }),
+  ] };
+}
+function pgHidden() { return { crumb: "Sections & apps", title: "Hidden apps", note: "Hidden apps disappear from home, All apps and Recently used. Nothing is uninstalled.", rows:
+  apps.map(a => T(a.name, () => cfg.hidden.includes(a.id), v => { cfg.hidden = cfg.hidden.filter(x => x !== a.id); if (v) cfg.hidden.push(a.id); })) }; }
+
+function pgInputs() { return { crumb: "Lumen Settings", title: "Inputs", note: "Names you set here are used on the home screen and in Other sources.", rows: [
+  ...cfg.ports.map(p => A(portLine(p), () => push(() => pgPort(p.id)), cfg.featured.includes(p.id) ? "On home" : p.other ? "Other sources" : "Hidden", { chev: true })),
+  A("Reorder home input cards", () => push(() => ({ crumb: "Inputs", title: "Home input cards", note: "Press OK to pick up a card, move it with ↑ ↓, press OK to drop it.",
+    reorder: { get: () => cfg.featured.slice(), set: ids => cfg.featured = ids, label: id => portLine(portById(id)) } })), cfg.featured.length + " cards", { chev: true }),
+  HEAD("Other sources"),
+  T("Show the Other sources card", () => cfg.otherTile, v => cfg.otherTile = v),
+  T("Include AirPlay", () => cfg.airplay, v => cfg.airplay = v),
+] }; }
+function pgPort(id) {
+  const p = portById(id);
+  return { crumb: "Inputs", title: portLine(p), rows: [
+    X("Device name", () => p.name, v => p.name = v.trim(), "Leave empty for Unassigned"),
+    X("Brand line", () => p.brand, v => p.brand = v.trim(), "Shown small above the name"),
+    T("Show on home screen", () => cfg.featured.includes(p.id), v => { cfg.featured = cfg.featured.filter(x => x !== p.id); if (v) cfg.featured.push(p.id); }),
+    T("Show in Other sources", () => p.other, v => p.other = v),
+    C("Card style", Object.entries(STYLE_NAMES), () => p.style, v => p.style = v),
+    I("Card image", () => p.img, v => { p.img = v; if (v) p.style = "image"; }, 1024),
+    T("Audio return (eARC)", () => p.earc, v => p.earc = v),
+  ] };
+}
+function pgLook() { return { crumb: "Lumen Settings", title: "Look & feel", rows: [
+  X("TV name", () => cfg.tvName, v => cfg.tvName = v.trim() || "My TV"),
+  HEAD("Ambient light"),
+  T("Ambient light", () => cfg.ambient.on, v => cfg.ambient.on = v),
+  C("Brightness", [["low", "Low"], ["medium", "Medium"], ["high", "High"]], () => cfg.ambient.level, v => cfg.ambient.level = v),
+  C("Color", [["app", "Follow the app"], ["violet", "Violet"], ["blue", "Blue"], ["teal", "Teal"], ["amber", "Amber"], ["rose", "Rose"]], () => cfg.ambient.color, v => cfg.ambient.color = v),
+  C("Background", [["ambient", "Ambient only"], ["black", "Pure black"], ["image", "Your image"]], () => cfg.bg.mode, v => cfg.bg.mode = v),
+  I("Background image", () => cfg.bg.img, v => { cfg.bg.img = v; if (v) cfg.bg.mode = "image"; }, 1920),
+  HEAD("Focus"),
+  T("Focus stroke", () => cfg.stroke.on, v => cfg.stroke.on = v),
+  T("Stroke trail", () => cfg.stroke.trail, v => cfg.stroke.trail = v),
+  C("Corners", [["rounded", "Rounded"], ["soft", "Soft"], ["square", "Square"]], () => cfg.corners, v => cfg.corners = v),
+  C("Highlight color", [["amber", "Amber"], ["ice", "Ice"], ["mint", "Mint"], ["rose", "Rose"]], () => cfg.accent, v => cfg.accent = v),
+] }; }
+function pgWeather() { return { crumb: "Lumen Settings", title: "Weather & clock", rows: [
+  T("Show weather", () => cfg.weather.on, v => cfg.weather.on = v),
+  X("Location", () => cfg.weather.loc, v => { const n = v.trim(); if (n && n !== cfg.weather.loc) { cfg.weather.loc = n; cfg.weather.lat = cfg.weather.lon = null; } }, "City, state"),
+  C("Units", [["F", "°F"], ["C", "°C"]], () => cfg.weather.unit, v => cfg.weather.unit = v),
+  HEAD("Clock"),
+  C("Format", [[false, "12-hour"], [true, "24-hour"]], () => cfg.clock24, v => cfg.clock24 = v),
+  T("Show date", () => cfg.showDate, v => cfg.showDate = v),
+] }; }
+function pgMotion() { return { crumb: "Lumen Settings", title: "Motion", note: "60 fps is smoothest. If the stroke stutters on the TV, switch to 30.", rows: [
+  C("Frame rate", [[30, "30 fps"], [60, "60 fps"]], () => cfg.fps, v => cfg.fps = v),
+  C("Color fade", [["slow", "Slow · 1.2 s"], ["normal", "Normal · 0.7 s"], ["fast", "Fast · 0.4 s"]], () => cfg.fade, v => cfg.fade = v),
+  C("Stroke speed", [["relaxed", "Relaxed"], ["normal", "Normal"], ["snappy", "Snappy"]], () => cfg.stroke.speed, v => cfg.stroke.speed = v),
+  C("Title animation", [["letters", "Letter by letter"], ["slide", "Slide"], ["fade", "Fade"], ["off", "Off"]], () => cfg.titleAnim, v => cfg.titleAnim = v),
+  T("Reduce motion", () => cfg.reduce, v => cfg.reduce = v),
+] }; }
+function pgBehavior() { return { crumb: "Lumen Settings", title: "Behavior", rows: [
+  C("Home button on the remote", [["top", "Opens Lumen at the top"], ["stay", "Returns to where you were"]], () => cfg.homeBtn, v => cfg.homeBtn = v),
+  C("Start on", [["recents", "Recently used"], ["section", "First home section"]], () => cfg.start, v => cfg.start = v),
+  T("Show button hints", () => cfg.hintsOn, v => cfg.hintsOn = v),
+  C("Back on the home screen", [["first", "Jump to the first app"], ["none", "Do nothing"]], () => cfg.backHome, v => cfg.backHome = v),
+  T("Hold OK for quick options", () => cfg.hold, v => cfg.hold = v),
+  C("Dim when idle", [[0, "Never"], [5, "After 5 min"], [10, "After 10 min"], [30, "After 30 min"]], () => cfg.idle, v => cfg.idle = v),
+] }; }
+let importDraft = "";
+function pgBackup() { return { crumb: "Lumen Settings", title: "Backup & reset", rows: [
+  A("Copy settings", () => { const txt = JSON.stringify(cfg); navigator.clipboard?.writeText(txt).then(() => toast("Settings copied"), () => toast("Copy blocked. Use the box below.")); }, "", {}),
+  { t: "area", label: "Export", get: () => JSON.stringify(cfg, null, 1), readonly: true },
+  HEAD("Restore"),
+  { t: "area", label: "Paste settings here", get: () => importDraft, set: v => importDraft = v, ph: "Paste exported settings, then choose Apply" },
+  A("Apply pasted settings", () => { try { cfg = merge(JSON.parse(importDraft)); importDraft = ""; toast("Settings restored"); } catch { toast("That text isn't valid Lumen settings."); } }, ""),
+  A("Reset everything to defaults", () => { cfg = clone(DEFAULTS); lastUsed = clone(SAMPLE_RECENTS); toast("Back to defaults"); }, "", { confirm: true, danger: true }),
+] }; }
+const CATS = [["Home screen", "home", pgHome], ["Sections & apps", "apps", pgSections], ["Inputs", "input", pgInputs], ["Look & feel", "look", pgLook],
+  ["Weather & clock", "sky", pgWeather], ["Motion", "motion", pgMotion], ["Behavior", "behave", pgBehavior], ["Backup & reset", "backup", pgBackup]];
+
+let S = null; // settings state
+function openSettings(cat = 0, sub) {
+  closeSheet(); sheetPrev = null;
+  const L = el("div", "layer settings", `<nav class="snav"><h2>Lumen</h2><div class="sub">Settings for ${esc(cfg.tvName)}</div><div id="navList"></div><div class="foot">LUMEN 0.2 · PROTOTYPE</div></nav>
+    <div class="spane"><div class="crumb" id="sCrumb"></div><h3 id="sTitle"></h3><p class="note" id="sNote"></p><div class="sview" id="sView"><div class="srows" id="sRows"></div></div></div>`);
+  openLayer(L, "settings"); ringOff();
+  const nav = L.querySelector("#navList");
+  S = { nav: cat, area: sub ? "pane" : "nav", stack: [CATS[cat][2]], ri: 0, grab: -1, armed: null, navEls: [] };
+  S.navEls = CATS.map(([n, ic], i) => { const e = el("div", "navi", `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[ic]}</svg>${n}`); nav.append(e);
+    e.onclick = () => { S.nav = i; S.stack = [CATS[i][2]]; S.ri = 0; S.area = "pane"; renderSettings(); }; return e; });
+  if (sub) S.stack.push(sub);
+  renderSettings();
+}
+function push(fn) { S.stack.push(fn); S.ri = 0; S.grab = -1; }
+function pop() { if (S.stack.length > 1) { S.stack.pop(); S.ri = 0; S.grab = -1; } }
+let sRows = [];
+function renderSettings() {
+  S.navEls.forEach((e, i) => { e.classList.toggle("sel", i === S.nav); e.classList.toggle("focus", i === S.nav && S.area === "nav"); });
+  const pg = S.stack[S.stack.length - 1]();
+  $("#sCrumb").textContent = pg.crumb; $("#sTitle").textContent = pg.title; $("#sNote").textContent = pg.note || "";
+  $("#sView").style.top = (pg.note ? 250 : 210) + "px";
+  const box = $("#sRows"); box.innerHTML = "";
+  if (pg.reorder) {
+    const ids = pg.reorder.get();
+    sRows = ids.map((id, i) => ({ t: "item", label: pg.reorder.label(id), id, i, pg }));
+  } else sRows = pg.rows;
+  if (!sRows.length) box.append(el("div", "srow head", "Nothing here yet"));
+  sRows.forEach((r, i) => {
+    let e;
+    if (r.t === "head") e = el("div", "srow head", esc(r.label));
+    else if (r.t === "area") {
+      e = el("div", "srow area"); const ta = el("textarea"); ta.value = r.get(); ta.readOnly = !!r.readonly; ta.placeholder = r.ph || ""; ta.tabIndex = -1;
+      ta.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.stopPropagation(); ev.preventDefault(); ta.blur(); } else ev.stopPropagation(); });
+      ta.addEventListener("input", () => r.set && r.set(ta.value)); e.append(ta);
+    } else {
+      e = el("div", "srow" + (r.danger ? " danger" : "") + (pg.reorder && S.grab === i ? " grab" : ""));
+      let v = "";
+      if (r.t === "toggle") v = `<span class="sw${r.get() ? " on" : ""}"></span>`;
+      else if (r.t === "choice") { const o = r.opts.find(o => o[0] === r.get()); v = `<span class="cyc">${esc(o ? o[1] : r.get())}</span>`; }
+      else if (r.t === "text") v = esc(r.get() || r.ph || "");
+      else if (r.t === "image") { const src = r.get(); v = src ? `Replace or remove<span class="thumb" style="background-image:url('${src}')"></span>` : "Choose image…"; }
+      else if (r.t === "action") v = (S.armed === r.label ? "Press OK again to confirm" : esc(r.value || "")) + (r.chev ? `<span class="chev"></span>` : "");
+      else if (r.t === "item") v = S.grab === i ? "Moving · ↑ ↓ then OK" : "";
+      e.innerHTML = (r.t === "item" ? `<span class="idx">${i + 1}</span>` : "") + `<span>${esc(r.label)}</span><span class="v">${v}</span>`;
+    }
+    e.onclick = () => { if (r.t === "head") return; S.area = "pane"; S.ri = i; okSettings(); };
+    box.append(e); r.el = e;
+  });
+  if (S.ri >= sRows.length || sRows[S.ri]?.t === "head") S.ri = Math.max(0, sRows.findIndex(r => r.t !== "head"));
+  focusRow();
+  hints(S.area === "nav" ? [["↑↓", "Category"], ["→ / OK", "Open"], ["Back", "Close"]]
+    : pg.reorder ? [["OK", S.grab >= 0 ? "Drop" : "Pick up"], ["↑↓", "Move"], ["Back", "Done"]]
+    : [["↑↓", "Move"], ["← →", "Change"], ["OK", "Select"], ["Back", S.stack.length > 1 ? "Back" : "Categories"]]);
+}
+function focusRow() {
+  sRows.forEach(r => r.el && r.el.classList.remove("focus"));
+  if (S.area !== "pane" || !sRows[S.ri]) { $("#sRows").style.transform = ""; return; }
+  const e = sRows[S.ri].el; e.classList.add("focus");
+  const viewH = $("#sView").offsetHeight, y = e.offsetTop, h = e.offsetHeight;
+  $("#sRows").style.transform = `translateY(${-Math.max(0, Math.min(y - viewH * .35, $("#sRows").offsetHeight - viewH + 20))}px)`;
+}
+function changed() { save(); applyCfg(); renderSettings(); }
+function stepRow(d) { let i = S.ri; do { i += d; } while (sRows[i] && sRows[i].t === "head"); if (sRows[i]) { S.ri = i; S.armed = null; focusRow(); renderSettings(); } }
+function cycle(r, d) { const i = r.opts.findIndex(o => o[0] === r.get()); r.set(r.opts[(i + d + r.opts.length) % r.opts.length][0]); changed(); }
+function okSettings() {
+  const r = sRows[S.ri]; if (!r) return;
+  if (r.t === "item") {
+    if (S.grab === S.ri) S.grab = -1; else S.grab = S.ri;
+    return renderSettings();
+  }
+  if (r.t === "toggle") { r.set(!r.get()); return changed(); }
+  if (r.t === "choice") return cycle(r, 1);
+  if (r.t === "action") {
+    if (r.confirm && S.armed !== r.label) { S.armed = r.label; return renderSettings(); }
+    S.armed = null; r.run(); return changed();
+  }
+  if (r.t === "image") {
+    if (r.get()) return openSheet(r.label, "Image", [{ label: "Choose a new image…", run: () => pickImage(r.max, url => { r.set(url); changed(); }) },
+      { label: "Remove image", danger: true, run: () => { r.set(null); changed(); } }]);
+    return pickImage(r.max, url => { r.set(url); changed(); });
+  }
+  if (r.t === "text") {
+    const v = r.el.querySelector(".v"); const inp = el("input"); inp.value = r.get() || ""; inp.placeholder = r.ph || ""; v.innerHTML = ""; v.append(inp); inp.focus(); inp.select(); TV.keyboard();
+    inp.addEventListener("keydown", ev => { ev.stopPropagation();
+      if (ev.key === "Enter") { ev.preventDefault(); r.set(inp.value); changed(); }
+      if (ev.key === "Escape") { ev.preventDefault(); renderSettings(); } });
+    inp.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== inp && inp.isConnected) renderSettings(); }, 0));
+    return;
+  }
+  if (r.t === "area") { const ta = r.el.querySelector("textarea"); ta.tabIndex = 0; ta.focus(); }
+}
+function settingsKey(k) {
+  if (S.area === "nav") {
+    if (k === "up" || k === "down") { S.nav = (S.nav + (k === "up" ? -1 : 1) + CATS.length) % CATS.length; S.stack = [CATS[S.nav][2]]; S.ri = 0; }
+    else if (k === "right" || k === "ok") { S.area = "pane"; }
+    else if (k === "back") { closeLayer(); return goHome(); }
+    return renderSettings();
+  }
+  const r = sRows[S.ri];
+  if (S.grab >= 0 && (k === "up" || k === "down")) {
+    const pg = r.pg, ids = pg.reorder.get(), j = S.ri + (k === "up" ? -1 : 1);
+    if (j < 0 || j >= ids.length) return;
+    [ids[S.ri], ids[j]] = [ids[j], ids[S.ri]]; pg.reorder.set(ids); S.ri = j; S.grab = j; save(); applyCfg(); return renderSettings();
+  }
+  if (k === "up" || k === "down") return stepRow(k === "up" ? -1 : 1);
+  if (k === "left") { if (r && r.t === "choice") return cycle(r, -1); if (S.stack.length === 1) { S.area = "nav"; return renderSettings(); } return; }
+  if (k === "right") { if (r && r.t === "choice") return cycle(r, 1); return; }
+  if (k === "ok") return okSettings();
+  if (k === "back") { if (S.grab >= 0) { S.grab = -1; return renderSettings(); } if (S.stack.length > 1) { pop(); return renderSettings(); } S.area = "nav"; return renderSettings(); }
+}
+
+/* ===================================================================== apply config */
+function applyCfg() {
+  stage.style.setProperty("--accent", ACCENTS[cfg.accent] || ACCENTS.amber);
+  stage.style.setProperty("--r", CORNERS[cfg.corners] ?? 1);
+  stage.style.setProperty("--fade", (cfg.reduce ? 0 : FADES[cfg.fade]) + "ms");
+  stage.classList.toggle("hide-names", !cfg.names); stage.classList.toggle("nm-bottom", cfg.namePos === "bottom");
+  stage.classList.toggle("no-hero", !cfg.hero); stage.classList.toggle("no-stroke", !cfg.stroke.on); stage.classList.toggle("reduce", cfg.reduce);
+  $("#glow").style.opacity = cfg.ambient.on && cfg.bg.mode !== "black" ? LEVELS[cfg.ambient.level] * (cfg.bg.mode === "image" ? .7 : 1) : 0;
+  const bg = $("#bgimg"); bg.classList.toggle("on", cfg.bg.mode === "image" && !!cfg.bg.img); bg.style.backgroundImage = cfg.bg.img ? `url("${cfg.bg.img}")` : "";
+  $("#tvName").textContent = cfg.tvName; $("#protoTag").hidden = !!AND;
+  glowHue = null; tick(); renderWeather(); buildHome();
+}
+
+/* ===================================================================== weather + clock */
+let wx = null, wxSample = false, wxBusy = false;
+const WMO = c => c === 0 ? ["sun", "Clear"] : c <= 2 ? ["part", "Partly cloudy"] : c === 3 ? ["cloud", "Cloudy"] : c <= 48 ? ["fog", "Fog"] : c <= 67 ? ["rain", "Rain"] : c <= 77 ? ["snow", "Snow"] : c <= 82 ? ["rain", "Showers"] : c <= 86 ? ["snow", "Snow showers"] : ["storm", "Storms"];
+const WXI = {
+  sun: '<circle cx="20" cy="20" r="7" fill="#f6c86b"/><g stroke="#f6c86b" stroke-width="2.4" stroke-linecap="round"><path d="M20 4v4M20 32v4M4 20h4M32 20h4M8.7 8.7l2.8 2.8M28.5 28.5l2.8 2.8M8.7 31.3l2.8-2.8M28.5 11.5l2.8-2.8"/></g>',
+  part: '<circle cx="15" cy="14" r="6" fill="#f6c86b"/><path d="M12 31h17a6 6 0 0 0 0-12 8 8 0 0 0-15 2 5 5 0 0 0-2 10z" fill="#d9dbe4"/>',
+  cloud: '<path d="M10 30h20a7 7 0 0 0 0-14 9 9 0 0 0-17 2 6 6 0 0 0-3 12z" fill="#c9cbd6"/>',
+  fog: '<g stroke="#c9cbd6" stroke-width="3" stroke-linecap="round"><path d="M7 14h26M5 21h30M9 28h22"/></g>',
+  rain: '<path d="M10 24h20a6 6 0 0 0 0-12 8 8 0 0 0-15 2 5 5 0 0 0-5 10z" fill="#c9cbd6"/><g stroke="#8fc3ff" stroke-width="2.6" stroke-linecap="round"><path d="M14 29l-2 5M21 29l-2 5M28 29l-2 5"/></g>',
+  snow: '<path d="M10 24h20a6 6 0 0 0 0-12 8 8 0 0 0-15 2 5 5 0 0 0-5 10z" fill="#c9cbd6"/><g fill="#fff"><circle cx="13" cy="31" r="1.8"/><circle cx="20" cy="34" r="1.8"/><circle cx="27" cy="31" r="1.8"/></g>',
+  storm: '<path d="M10 22h20a6 6 0 0 0 0-12 8 8 0 0 0-15 2 5 5 0 0 0-5 10z" fill="#9fa1ad"/><path d="M21 22l-5 8h5l-3 7 8-10h-5l3-5z" fill="#f6c86b"/>',
+};
+async function loadWeather() {
+  if (!cfg.weather.on || wxBusy) return; wxBusy = true;
+  const loc = cfg.weather.loc;
+  const u = cfg.weather.unit === "C" ? "celsius" : "fahrenheit";
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 6000);
+    if (cfg.weather.lat == null) {
+      const g = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(cfg.weather.loc.split(",")[0])}`, { signal: ctl.signal })).json();
+      if (!g.results?.length) throw 0; cfg.weather.lat = g.results[0].latitude; cfg.weather.lon = g.results[0].longitude; save();
+    }
+    const r = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cfg.weather.lat}&longitude=${cfg.weather.lon}&current=temperature_2m,weather_code&temperature_unit=${u}`, { signal: ctl.signal })).json();
+    wx = { t: Math.round(r.current.temperature_2m), code: r.current.weather_code, unit: cfg.weather.unit, loc }; wxSample = false;
+  } catch { wx = { t: cfg.weather.unit === "C" ? 9 : 48, code: 2, unit: cfg.weather.unit, loc }; wxSample = true; }
+  wxBusy = false; renderWeather();
+}
+function renderWeather() {
+  const w = $("#weather"); w.hidden = !cfg.weather.on;
+  if (w.hidden) return;
+  if (!wx || wx.unit !== cfg.weather.unit || wx.loc !== cfg.weather.loc) { w.hidden = !wx; loadWeather(); if (!wx) return; }
+  const [ic, word] = WMO(wx.code);
+  w.innerHTML = `<svg viewBox="0 0 40 40">${WXI[ic]}</svg>${wx.t}°<span>${word} · ${esc(cfg.weather.loc.split(",")[0])}${wxSample ? " · sample" : ""}</span>`;
+}
+function tick() {
+  const d = new Date();
+  $("#time").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: !cfg.clock24 }).replace(/\s?[AP]M/i, "");
+  $("#date").textContent = cfg.showDate ? d.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" }) : "";
+  const dm = stage.querySelector(".dimmer b"); if (dm) dm.textContent = $("#time").textContent;
+}
+
+/* ===================================================================== idle dim */
+let lastInput = Date.now(), dimmer = null;
+setInterval(() => {
+  if (cfg.idle && !dimmer && view !== "app" && Date.now() - lastInput > cfg.idle * 60e3) {
+    dimmer = el("div", "layer dimmer", `<div><b>${$("#time").textContent}</b><span>${esc(cfg.tvName)} · Press any button</span></div>`); dimmer.style.zIndex = 50; stage.append(dimmer);
+  }
+}, 15000);
+function wake() { lastInput = Date.now(); if (dimmer) { dimmer.remove(); dimmer = null; return true; } return false; }
+
+/* ===================================================================== remote input */
+function move(dr, dc) {
+  heroDir = [dc, dr];
+  if (view === "home") {
+    if (dr) {
+      const r = fr + dr; if (r < 0 || r >= rows.length) return;
+      const cur = rel(rows[fr].items[fc].el, page);
+      setFocus(r, nearest(rows[r].items, cur.x + cur.w / 2));
+    } else setFocus(fr, fc + dc);
+  } else if (view === "grid") {
+    if (dr) { const r = grid.r + dr; if (r < 0 || r >= grid.rows.length) return; const cur = rel(grid.rows[grid.r][grid.c].el, grid.inner);
+      let best = 0, bd = 1e9; grid.rows[r].forEach((i, n) => { const q = rel(i.el, grid.inner); const d = Math.abs(q.x + q.w / 2 - cur.x - cur.w / 2); if (d < bd) { bd = d; best = n; } });
+      gridFocus(r, best); }
+    else gridFocus(grid.r, grid.c + dc);
+  } else if (view === "sheet") { if (dr) setOpt(sheet.i + dr); }
+}
+function back() {
+  if (view === "sheet") return closeSheet();
+  if (view === "settings") return settingsKey("back");
+  if (view === "grid" || view === "app") return goHome();
+  if (view === "home" && cfg.backHome === "first") startFocus();
+}
+let holdT = null, held = false;
+document.addEventListener("keydown", e => {
+  if (/INPUT|TEXTAREA/.test(document.activeElement?.tagName)) return;
+  if (wake()) { e.preventDefault(); return; }
+  const k = e.key, dir = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" }[k];
+  if (view === "settings") {
+    if (dir) { e.preventDefault(); return settingsKey(dir); }
+    if (k === "Enter" || k === " ") { e.preventDefault(); if (!e.repeat) settingsKey("ok"); return; }
+    if (k === "Escape" || k === "Backspace") { e.preventDefault(); return settingsKey("back"); }
+    return;
+  }
+  if (dir) { e.preventDefault(); return move(...{ up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] }[dir]); }
+  if (k === "Enter" || k === " ") { e.preventDefault(); if (!e.repeat) okDown(); return; }
+  if (k === "Escape" || k === "Backspace") { e.preventDefault(); return back(); }
+  if (k === "f" || k === "F") document.documentElement.requestFullscreen?.().catch(() => {});
+});
+document.addEventListener("keyup", e => { if (e.key === "Enter" || e.key === " ") okUp(); });
+function okDown() {
+  if (view === "settings") return settingsKey("ok");
+  if (view === "sheet") return pickOpt();
+  if (view !== "home" && view !== "grid") return;
+  held = false; clearTimeout(holdT);
+  holdT = setTimeout(() => { holdT = null; const it = current(); if (cfg.hold && it && (it.kind === "app" || it.kind === "featured" || it.kind === "port")) { held = true; quickOptions(it); } }, 600);
+}
+function okUp() { if (holdT) { clearTimeout(holdT); holdT = null; if (!held && (view === "home" || view === "grid")) activate(); } }
+
+/* ---- calls from the Android shell (remote Home, Back and OK keys, app resume) */
+const editing = () => /INPUT|TEXTAREA/.test(document.activeElement?.tagName);
+const keyTo = (node, key) => node.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+window.lumenOk = down => { if (editing()) { if (down && document.activeElement.tagName === "INPUT") keyTo(document.activeElement, "Enter"); return; } if (down) { if (wake()) return; okDown(); } else okUp(); };
+window.lumenBack = () => { if (editing()) return keyTo(document.activeElement, "Escape"); if (wake()) return; back(); };
+window.lumenHome = () => {
+  wake(); if (sheet) { sheet.remove(); sheet = null; sheetPrev = null; }
+  if (cfg.homeBtn === "stay") { if (view !== "home") goHome(); return; }
+  closeLayer(); buildHome(); startFocus();
+};
+window.lumenResume = () => {
+  syncInputs(); lastUsed = mergeRecents(lastUsed, TV.recents());
+  if (view === "app") goHome(); else if (view === "home") { const k = focusKey(); buildHome(); restoreFocus(k); }
+};
+window.lumenToast = msg => toast(msg);
+document.addEventListener("pointerdown", () => { wake(); });
+stage.addEventListener("contextmenu", e => {
+  const it = (view === "home" ? rows.flatMap(r => r.items) : view === "grid" ? grid.rows.flat() : []).find(i => i.el.contains(e.target));
+  if (!it || !(it.kind === "app" || it.kind === "featured" || it.kind === "port")) return; e.preventDefault(); quickOptions(it);
+});
+
+/* ===================================================================== boot */
+function fit() { const v = $("#viewport"), s = Math.min(v.clientWidth / 1920, v.clientHeight / 1080); stage.style.transform = `scale(${s}) translate(-50%, -50%)`; }
+window.addEventListener("resize", fit); fit();
+syncInputs(); applyCfg(); startFocus(); homeHints();
+setInterval(tick, 10000); loadWeather(); setInterval(loadWeather, 15 * 60e3);
+</script>
+
+</body>
+</html>

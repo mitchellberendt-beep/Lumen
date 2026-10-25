@@ -1,0 +1,32 @@
+plugins { id 'com.android.application' }
+
+def vc = (project.findProperty('versionCode') ?: '1').toString().toInteger()
+
+android {
+    namespace 'com.mitch.lumen'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.mitch.lumen'
+        minSdk 26
+        targetSdk 34
+        versionCode vc
+        versionName "1." + vc
+    }
+    signingConfigs {
+        release {
+            // Personal sideload key, kept in the repo so every build can update the last one.
+            storeFile file('lumen.keystore')
+            storePassword 'lumenhome'
+            keyAlias 'lumen'
+            keyPassword 'lumenhome'
+        }
+    }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.release }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint { checkReleaseBuilds false; abortOnError false }
+}
