@@ -359,6 +359,7 @@ const DEFAULTS = {
   fps: 60, fade: "normal", reduce: false,
   start: "recents", idle: 10, hold: true, backHome: "first",
   titleAnim: "letters", homeBtn: "top", hintsOn: false,
+  sound: { on: true, vol: "low", style: "soft" },
 };
 const clone = o => JSON.parse(JSON.stringify(o));
 const store = {
@@ -581,7 +582,7 @@ function goHome(refocus = true) {
   if (refocus === "first") startFocus(); else restoreFocus(key);
 }
 function activate() {
-  const it = current(); if (!it) return;
+  const it = current(); if (!it) return; sfx("ok");
   if (it.kind === "app") return openApp(it.data);
   if (it.kind === "allapps") return openAll();
   if (it.kind === "lumen") return openSettings();
@@ -729,6 +730,7 @@ const ICONS = {
   look: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>',
   sky: '<circle cx="9" cy="10" r="4"/><path d="M7 19h10a4 4 0 0 0 0-8"/>',
   motion: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  sound: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/>',
   behave: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
   backup: '<path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4M12 3v12M7 10l5 5 5-5"/>',
 };
@@ -836,6 +838,11 @@ function pgBehavior() { return { crumb: "Lumen Settings", title: "Behavior", row
   T("Hold OK for quick options", () => cfg.hold, v => cfg.hold = v),
   C("Dim when idle", [[0, "Never"], [5, "After 5 min"], [10, "After 10 min"], [30, "After 30 min"]], () => cfg.idle, v => cfg.idle = v),
 ] }; }
+function pgSound() { return { crumb: "Lumen Settings", title: "Sound", rows: [
+  T("Navigation sounds", () => cfg.sound.on, v => cfg.sound.on = v),
+  C("Volume", [["low", "Low"], ["medium", "Medium"], ["high", "High"]], () => cfg.sound.vol, v => { cfg.sound.vol = v; setTimeout(() => sfx("ok"), 50); }),
+  C("Style", [["soft", "Soft"], ["click", "Click"], ["glass", "Glass"]], () => cfg.sound.style, v => { cfg.sound.style = v; setTimeout(() => sfx("ok"), 50); }),
+] }; }
 let importDraft = "";
 function pgBackup() { return { crumb: "Lumen Settings", title: "Backup & reset", rows: [
   A("Copy settings", () => { const txt = JSON.stringify(cfg); navigator.clipboard?.writeText(txt).then(() => toast("Settings copied"), () => toast("Copy blocked. Use the box below.")); }, "", {}),
@@ -846,7 +853,7 @@ function pgBackup() { return { crumb: "Lumen Settings", title: "Backup & reset",
   A("Reset everything to defaults", () => { cfg = clone(DEFAULTS); lastUsed = clone(SAMPLE_RECENTS); toast("Back to defaults"); }, "", { confirm: true, danger: true }),
 ] }; }
 const CATS = [["Home screen", "home", pgHome], ["Sections & apps", "apps", pgSections], ["Inputs", "input", pgInputs], ["Look & feel", "look", pgLook],
-  ["Weather & clock", "sky", pgWeather], ["Motion", "motion", pgMotion], ["Behavior", "behave", pgBehavior], ["Backup & reset", "backup", pgBackup]];
+  ["Weather & clock", "sky", pgWeather], ["Motion", "motion", pgMotion], ["Sound", "sound", pgSound], ["Behavior", "behave", pgBehavior], ["Backup & reset", "backup", pgBackup]];
 
 let S = null; // settings state
 function openSettings(cat = 0, sub) {
@@ -1022,6 +1029,33 @@ setInterval(() => {
 }, 15000);
 function wake() { lastInput = Date.now(); if (dimmer) { dimmer.remove(); dimmer = null; return true; } return false; }
 
+/* ===================================================================== sound */
+let actx = null;
+const SFX = {
+  soft:  { move: [1320, .05, "sine"], ok: [660, .11, "sine"], back: [520, .1, "sine"], edge: [240, .06, "triangle"] },
+  click: { move: [2600, .018, "square"], ok: [1400, .04, "square"], back: [900, .04, "square"], edge: [320, .03, "square"] },
+  glass: { move: [1760, .16, "sine"], ok: [1046, .32, "sine"], back: [784, .26, "sine"], edge: [392, .1, "triangle"] },
+};
+function sfx(kind) {
+  if (!cfg.sound.on) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    const [f, d, type] = (SFX[cfg.sound.style] || SFX.soft)[kind], t = actx.currentTime + .005;
+    const vol = ({ low: .05, medium: .1, high: .18 }[cfg.sound.vol] || .05) * (type === "square" ? .35 : 1);
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (kind === "ok") o.frequency.exponentialRampToValueAtTime(f * 1.5, t + d);
+    if (kind === "back") o.frequency.exponentialRampToValueAtTime(f * .7, t + d);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .006); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + d + .03);
+    if (cfg.sound.style === "glass") { const o2 = actx.createOscillator(), g2 = actx.createGain(); o2.type = "sine"; o2.frequency.setValueAtTime(f * 2.01, t);
+      g2.gain.setValueAtTime(.0001, t); g2.gain.exponentialRampToValueAtTime(vol * .3, t + .006); g2.gain.exponentialRampToValueAtTime(.0001, t + d * .6);
+      o2.connect(g2).connect(actx.destination); o2.start(t); o2.stop(t + d); }
+  } catch { }
+}
+const focusSig = () => JSON.stringify([view, fr, fc, grid?.r, grid?.c, sheet?.i, S?.nav, S?.ri, S?.area, S?.stack?.length]);
+
 /* ===================================================================== remote input */
 function move(dr, dc) {
   heroDir = [dc, dr];
@@ -1039,6 +1073,7 @@ function move(dr, dc) {
   } else if (view === "sheet") { if (dr) setOpt(sheet.i + dr); }
 }
 function back() {
+  if (view !== "home") sfx("back");
   if (view === "sheet") return closeSheet();
   if (view === "settings") return settingsKey("back");
   if (view === "grid" || view === "app") return goHome();
@@ -1050,20 +1085,20 @@ document.addEventListener("keydown", e => {
   if (wake()) { e.preventDefault(); return; }
   const k = e.key, dir = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" }[k];
   if (view === "settings") {
-    if (dir) { e.preventDefault(); return settingsKey(dir); }
+    if (dir) { e.preventDefault(); const b4 = focusSig(); settingsKey(dir); return sfx(focusSig() !== b4 || dir === "left" || dir === "right" ? "move" : "edge"); }
     if (k === "Enter" || k === " ") { e.preventDefault(); if (!e.repeat) settingsKey("ok"); return; }
     if (k === "Escape" || k === "Backspace") { e.preventDefault(); return settingsKey("back"); }
     return;
   }
-  if (dir) { e.preventDefault(); return move(...{ up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] }[dir]); }
+  if (dir) { e.preventDefault(); const b4 = focusSig(); move(...{ up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] }[dir]); return sfx(focusSig() !== b4 ? "move" : "edge"); }
   if (k === "Enter" || k === " ") { e.preventDefault(); if (!e.repeat) okDown(); return; }
   if (k === "Escape" || k === "Backspace") { e.preventDefault(); return back(); }
   if (k === "f" || k === "F") document.documentElement.requestFullscreen?.().catch(() => {});
 });
 document.addEventListener("keyup", e => { if (e.key === "Enter" || e.key === " ") okUp(); });
 function okDown() {
-  if (view === "settings") return settingsKey("ok");
-  if (view === "sheet") return pickOpt();
+  if (view === "settings") { sfx("ok"); return settingsKey("ok"); }
+  if (view === "sheet") { sfx("ok"); return pickOpt(); }
   if (view !== "home" && view !== "grid") return;
   held = false; clearTimeout(holdT);
   holdT = setTimeout(() => { holdT = null; const it = current(); if (cfg.hold && it && (it.kind === "app" || it.kind === "featured" || it.kind === "port")) { held = true; quickOptions(it); } }, 600);
