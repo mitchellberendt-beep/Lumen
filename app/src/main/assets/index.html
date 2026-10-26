@@ -64,7 +64,10 @@ body { background: var(--ink); color: var(--fg); overflow: hidden; font-family: 
 .clock span { font-size: 19px; color: var(--mute); white-space: nowrap; }
 
 /* title */
-.hero { height: 124px; margin-top: 14px; }
+.hero { height: 108px; margin-top: 14px; }
+.hero p, .label small, .ov-head span, .peek, .st-other .s { display: none !important; }
+.screen1 { height: 1036px; }
+.hints[hidden] { display: none; }
 .hero .kicker { font-family: var(--mono); font-size: 18px; letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--hk, 250) 60% 80%); transition: color 1s; }
 .hero h1 { font-family: var(--display); font-weight: 300; font-size: 72px; line-height: .98; letter-spacing: -.035em; margin: 8px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hero p { font-size: 22px; color: var(--mute); margin: 8px 0 0; }
@@ -119,7 +122,7 @@ html.device .stage { border-radius: 0; }
 .peek svg { width: 18px; height: 18px; }
 
 /* inputs */
-.inputs { margin-top: 150px; padding-bottom: 60px; }
+.inputs { margin-top: 30px; padding-bottom: 60px; }
 .inputs .label { margin-bottom: 24px; }
 .dock { display: grid; grid-template-columns: repeat(var(--dcols, 3), minmax(0, 1fr)); gap: 28px; }
 .incard { position: relative; height: 220px; border-radius: calc(22px * var(--r)); padding: 26px 30px; box-sizing: border-box; cursor: pointer; overflow: hidden;
@@ -260,6 +263,7 @@ html.device .stage { border-radius: 0; }
     <div class="glow" id="glow"><div></div><div></div></div>
     <div class="vignette"></div>
     <div id="page">
+      <div class="screen1">
       <div class="top">
         <div class="place"><i></i><span id="tvName">Bedroom TV</span></div>
         <div class="weather" id="weather"></div>
@@ -276,6 +280,7 @@ html.device .stage { border-radius: 0; }
         <p class="fd" id="meta"></p>
       </section>
       <div id="shelves"></div>
+      </div>
       <section class="inputs sec" id="inputs">
         <div class="label">Inputs <small>Hold OK on a card for options</small></div>
         <div class="dock" id="dock"></div>
@@ -328,7 +333,7 @@ if (AND) document.documentElement.classList.add("device");
 
 /* ===================================================================== config */
 const DEFAULTS = {
-  v: 2, tvName: "Bedroom TV",
+  v: 3, tvName: "Bedroom TV",
   recents: { on: true, count: 4, exclude: [] },
   hero: true, density: 8, names: true, namePos: "top",
   sections: [
@@ -353,7 +358,7 @@ const DEFAULTS = {
   clock24: false, showDate: true,
   fps: 60, fade: "normal", reduce: false,
   start: "recents", idle: 10, hold: true, backHome: "first",
-  titleAnim: "letters", homeBtn: "top", hintsOn: true,
+  titleAnim: "letters", homeBtn: "top", hintsOn: false,
 };
 const clone = o => JSON.parse(JSON.stringify(o));
 const store = {
@@ -368,6 +373,7 @@ function merge(saved) {
     c[k] = d && typeof d === "object" && !Array.isArray(d) && v && typeof v === "object" && !Array.isArray(v) ? { ...d, ...v } : v;
   }
   if (!(saved.v >= 2)) c.fps = 60;   // v2: smoother default
+  if (!(saved.v >= 3)) c.hintsOn = false;   // v3: no on-screen button hints by default
   c.v = DEFAULTS.v;
   return c;
 }
@@ -640,10 +646,10 @@ function openOther() {
   for (const p of cfg.ports.filter(p => p.other)) {
     const c = el("div", `port${p.earc ? " earc" : ""}${p.name ? "" : " unassigned"}${p.live ? " live" : ""}`,
       `${JACK}<span class="sigdot"></span><div class="id">${p.label}${p.earc ? '<span class="badge">eARC</span>' : ""}</div><div class="pn">${esc(portName(p))}</div>
-       <div class="foot">${p.earc ? "Audio return to soundbar" : p.live ? "Signal" : "No signal"}</div>${p.earc ? WAVE : ""}`);
+       <div class="foot">${p.live ? "Signal" : "No signal"}</div>${p.earc ? WAVE : ""}`);
     box.append(c); items.push({ el: c, kind: "port", data: p, scale: 1.05, rad: 20 });
   }
-  if (cfg.airplay) { const c = el("div", "port air", `${CAST}<div class="id">AirPlay</div><div class="pn">From iPhone or Mac</div><div class="foot">Wireless</div>`); box.append(c); items.push({ el: c, kind: "air", scale: 1.05, rad: 20 }); }
+  if (cfg.airplay) { const c = el("div", "port air", `${CAST}<div class="id">AirPlay</div>`); box.append(c); items.push({ el: c, kind: "air", scale: 1.05, rad: 20 }); }
   box.style.setProperty("--pc", Math.max(4, items.length));
   if (!items.length) { box.outerHTML = `<p class="note">Every source is hidden. Turn some back on in Lumen Settings → Inputs.</p>`; }
   grid = { rows: [items], inner, scroller: L.querySelector(".scroller"),
