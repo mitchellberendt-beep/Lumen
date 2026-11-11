@@ -64,7 +64,25 @@ body { background: var(--ink); color: var(--fg); overflow: hidden; font-family: 
 .clock span { font-size: 19px; color: var(--mute); white-space: nowrap; }
 
 /* title */
-.hero { height: 108px; margin-top: 14px; }
+.hero { height: 108px; margin-top: 14px; display: flex; align-items: flex-end; gap: 32px; }
+.hero .ht { flex: 1; min-width: 0; align-self: stretch; }
+.hero h1 { font-size: 64px; }
+.strip { display: flex; gap: 12px; flex: none; }
+.sc { position: relative; width: var(--cw, 186px); height: 96px; box-sizing: border-box; padding: 10px 14px 10px 18px; border-radius: calc(14px * var(--r)); overflow: hidden; cursor: pointer;
+  background: rgb(255 255 255 / .06); box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), background .18s; }
+.sc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(var(--ca, var(--line)), var(--ch, var(--line))); }
+.sc.focus { transform: scale(1.08); background: rgb(255 255 255 / .12); z-index: 2; }
+.sc .l1 { display: flex; justify-content: space-between; gap: 8px; font-family: var(--mono); font-size: 13px; letter-spacing: .07em; text-transform: uppercase; color: var(--mute); white-space: nowrap; }
+.sc .l1 span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.sc.live .l1 span:first-child { color: var(--accent); }
+.sc .tl { display: flex; justify-content: space-between; font-family: var(--mono); font-weight: 600; font-size: 21px; letter-spacing: .03em; line-height: 1.15; }
+.sc .tl em { font-style: normal; font-family: var(--display); font-weight: 500; font-size: 23px; font-variant-numeric: tabular-nums; }
+.sc.post .tl.lose { color: var(--mute); }
+.sc.more { align-items: center; text-align: center; gap: 2px; }
+.sc.more b { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1; }
+.sc.more span { font-size: 16px; color: var(--mute); }
+.scores-ov .inner .sub + .sub { margin-top: 30px; }
 .hero p, .label small, .ov-head span, .peek, .st-other .s { display: none !important; }
 .screen1 { height: 1036px; }
 .hints[hidden] { display: none; }
@@ -97,7 +115,7 @@ html.device .stage { border-radius: 0; }
 .pairwrap { margin-top: 22px; }
 .row.fill .tw.small .art { aspect-ratio: auto; height: 106px; }
 .tw { position: relative; cursor: pointer; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
-.art { position: relative; aspect-ratio: 16 / 9; border-radius: calc(22px * var(--r)); overflow: hidden;
+.art { position: relative; aspect-ratio: 16 / 8.6; border-radius: calc(22px * var(--r)); overflow: hidden;
   background: linear-gradient(150deg, hsl(var(--th) var(--ts) 38%), hsl(calc(var(--th) + 18) var(--ts) 15%));
   box-shadow: 0 1px 0 rgb(255 255 255 / .08) inset; transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s; }
 .tw.small .art { border-radius: calc(14px * var(--r)); }
@@ -123,6 +141,28 @@ html.device .stage { border-radius: 0; }
 
 /* inputs */
 .inputs { margin-top: 30px; padding-bottom: 60px; }
+.scores { margin-top: 30px; }
+.scores .sub + .sub { margin-top: 26px; }
+.games { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.gm { position: relative; height: 196px; box-sizing: border-box; padding: 20px 24px; border-radius: calc(20px * var(--r)); cursor: pointer;
+  background: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 10px;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), background .18s; overflow: hidden; }
+.gm::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: linear-gradient(var(--ca, var(--line)), var(--ch, var(--line))); }
+.gm.focus { transform: scale(1.05); background: var(--ink-3); z-index: 2; }
+.gtop { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-family: var(--mono); font-size: 16px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); white-space: nowrap; }
+.gtop .gst { overflow: hidden; text-overflow: ellipsis; }
+.gm.live .gst { color: var(--accent); }
+.gm.live .gst::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); margin-right: 9px; vertical-align: 1px; }
+.gt { display: flex; align-items: center; gap: 14px; font-size: 27px; }
+.gt i { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.gt b { font-family: var(--mono); font-size: 22px; width: 62px; flex: none; letter-spacing: .03em; }
+.gt span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gt em { font-style: normal; font-family: var(--display); font-weight: 500; font-size: 34px; font-variant-numeric: tabular-nums; }
+.gm.post .gt.lose { color: var(--mute); }
+.gnet { margin-top: auto; display: flex; gap: 10px; align-items: center; font-size: 18px; color: var(--mute); white-space: nowrap; }
+.gnet .chip { font-family: var(--mono); font-size: 15px; letter-spacing: .05em; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; }
+.gnet .go { color: var(--fg); }
+.gm.focus .gnet .go { color: var(--accent); }
 .inputs .label { margin-bottom: 24px; }
 .dock { display: grid; grid-template-columns: repeat(var(--dcols, 3), minmax(0, 1fr)); gap: 28px; }
 .incard { position: relative; height: 220px; border-radius: calc(22px * var(--r)); padding: 26px 30px; box-sizing: border-box; cursor: pointer; overflow: hidden;
@@ -275,9 +315,12 @@ html.device .stage { border-radius: 0; }
         <div class="clock"><b id="time">--:--</b><span id="date"></span></div>
       </div>
       <section class="hero" id="hero">
-        <div class="kicker fd" id="kicker"></div>
-        <h1 id="title"></h1>
-        <p class="fd" id="meta"></p>
+        <div class="ht">
+          <div class="kicker fd" id="kicker"></div>
+          <h1 id="title"></h1>
+          <p class="fd" id="meta"></p>
+        </div>
+        <div class="strip" id="strip" hidden></div>
       </section>
       <div id="shelves"></div>
       </div>
@@ -333,7 +376,7 @@ if (AND) document.documentElement.classList.add("device");
 
 /* ===================================================================== config */
 const DEFAULTS = {
-  v: 3, tvName: "Bedroom TV",
+  v: 4, tvName: "Bedroom TV",
   recents: { on: true, count: 4, exclude: [] },
   hero: true, density: 8, names: true, namePos: "top",
   sections: [
@@ -360,6 +403,9 @@ const DEFAULTS = {
   start: "recents", idle: 10, hold: true, backHome: "first",
   titleAnim: "letters", homeBtn: "top", hintsOn: false,
   sound: { on: true, vol: "low", style: "soft" },
+  scores: { on: true, primeNfl: true, primeNba: true, finalHours: 18, teams: [
+    { lg: "nfl", id: "3", name: "Bears" }, { lg: "nfl", id: "9", name: "Packers" }, { lg: "nba", id: "4", name: "Bulls" },
+    { lg: "mlb", id: "4", name: "White Sox" }, { lg: "mlb", id: "16", name: "Cubs" }, { lg: "mlb", id: "8", name: "Brewers" } ] },
 };
 const clone = o => JSON.parse(JSON.stringify(o));
 const store = {
@@ -473,6 +519,7 @@ function bindClick(item) { item.el.onclick = () => { if (view !== "home") return
 function buildHome() {
   const shelves = $("#shelves"); shelves.innerHTML = "";
   rows = [{ items: [{ el: $("#pAll"), kind: "allapps", key: "t:all", pill: true }, { el: $("#pLumen"), kind: "lumen", key: "t:lumen", pill: true }, { el: $("#pTv"), kind: "tvset", key: "t:tv", pill: true }] }];
+  buildScores();
   let lead = true;
   if (cfg.recents.on) {
     const ids = recentIds();
@@ -518,7 +565,7 @@ function buildHome() {
   }
   dock.style.setProperty("--dcols", Math.max(3, items.length));
   $("#inputs").hidden = !items.length;
-  if (items.length) rows.push({ id: "inputs", items });
+  if (items.length) rows.push({ id: "inputs", items, sec: $("#inputs") });
   rows.forEach(r => { r.items.forEach(bindClick); r.items.forEach(i => { i.scale ??= 1.07; i.rad ??= 30; }); });
 }
 function focusKey() { return rows[fr]?.items[fc]?.key; }
@@ -535,9 +582,9 @@ function setFocus(r, c) {
   rows.forEach(x => x.items.forEach(i => i.el.classList.remove("focus")));
   fr = r; fc = Math.max(0, Math.min(c, rows[r].items.length - 1));
   const it = rows[fr].items[fc]; it.el.classList.add("focus");
-  const onInputs = rows[fr].id === "inputs", sec = $("#inputs");
-  const shift = onInputs ? Math.max(0, sec.offsetTop + sec.offsetHeight + 40 - 1080) : 0;
-  page.style.transform = `translateY(${-shift}px)`; $("#peek").style.opacity = onInputs || !sec.offsetHeight ? 0 : 1;
+  const sec = rows[fr].sec;
+  const shift = sec ? Math.max(0, sec.offsetTop + sec.offsetHeight + 40 - 1080) : 0;
+  page.style.transform = `translateY(${-shift}px)`;
   ringHost(page);
   if (it.pill) ringOff(); else ringTo(it.el, it.scale, it.rad * CORNERS[cfg.corners]);
   updateHero(it);
@@ -552,6 +599,8 @@ function updateHero(it) {
   else if (it.kind === "lumen") { k = "Customize"; t = "Lumen Settings"; m = "Layout, sections, inputs, look and motion"; h = 285; }
   else if (it.kind === "tvset") { k = "System"; t = "TV Settings"; m = "Opens the TV's own settings: picture, sound, network"; h = 215; }
   else if (it.kind === "featured") { const p = it.data; k = `Input · ${p.label}${p.earc ? " · eARC" : ""}`; t = portName(p); m = (p.live ? "Signal detected" : "No signal") + " · Press OK to switch"; h = p.style === "red" ? 356 : p.style === "mono" ? 225 : 30; }
+  else if (it.kind === "scores") { k = "Scores"; t = "All scores"; m = ""; h = 30; }
+  else if (it.kind === "game") { const g = it.data; k = LG_NAME[g.lg] + (g.label ? " · " + g.label : ""); t = `${g.away.name} at ${g.home.name}`; m = ""; h = hexHue(g.home.color) ?? 30; }
   else { k = "Inputs"; t = "Other sources"; m = "Every HDMI port, plus AirPlay"; h = 30; }
   setGlow(h);
   const key = k + t + m; if (key === heroKey) return;
@@ -590,6 +639,8 @@ function activate() {
   if (it.kind === "featured" || it.kind === "port") return openInput(it.data);
   if (it.kind === "air") return openApp({ id: "air", name: "AirPlay", h: 210, s: 20, pkg: "com.tcl.airplay2" }, null, "Ready for AirPlay from an iPhone, iPad or Mac.");
   if (it.kind === "other") return openOther();
+  if (it.kind === "scores") return openScores();
+  if (it.kind === "game") { const w = watchOn(it.data); if (w) return openApp(w.app); return toast(it.data.nets[0] ? `${it.data.nets[0]} has no app on this TV` : "No TV listing yet"); }
 }
 function openApp(a, run, msg) {
   const L = el("div", "layer launch", `<div><h2>${esc(a.name)}</h2><p>Opening…</p><div class="bar"><i></i></div></div>`);
@@ -615,7 +666,7 @@ function gridFocus(r, c) {
   const top = rel(it.el, g.inner).y, max = Math.max(0, g.inner.offsetHeight - g.scroller.offsetHeight);
   g.inner.style.transform = `translateY(${-Math.min(max, Math.max(0, top - 140))}px)`;
   ringTo(it.el, it.scale, it.rad * CORNERS[cfg.corners]);
-  setGlow(it.data?.h ?? (it.kind === "air" ? 210 : it.data?.earc ? 32 : 30));
+  setGlow(it.data?.h ?? (it.kind === "game" ? hexHue(it.data.home.color) ?? 30 : it.kind === "air" ? 210 : it.data?.earc ? 32 : 30));
   if (g.onFocus) g.onFocus(it);
 }
 function openAll() {
@@ -730,6 +781,7 @@ const ICONS = {
   look: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>',
   sky: '<circle cx="9" cy="10" r="4"/><path d="M7 19h10a4 4 0 0 0 0-8"/>',
   motion: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  scores: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14M7 10v4M17 10v4"/>',
   sound: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/>',
   behave: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
   backup: '<path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4M12 3v12M7 10l5 5 5-5"/>',
@@ -853,7 +905,7 @@ function pgBackup() { return { crumb: "Lumen Settings", title: "Backup & reset",
   A("Reset everything to defaults", () => { cfg = clone(DEFAULTS); lastUsed = clone(SAMPLE_RECENTS); toast("Back to defaults"); }, "", { confirm: true, danger: true }),
 ] }; }
 const CATS = [["Home screen", "home", pgHome], ["Sections & apps", "apps", pgSections], ["Inputs", "input", pgInputs], ["Look & feel", "look", pgLook],
-  ["Weather & clock", "sky", pgWeather], ["Motion", "motion", pgMotion], ["Sound", "sound", pgSound], ["Behavior", "behave", pgBehavior], ["Backup & reset", "backup", pgBackup]];
+  ["Weather & clock", "sky", pgWeather], ["Motion", "motion", pgMotion], ["Sound", "sound", pgSound], ["Scores", "scores", pgScores], ["Behavior", "behave", pgBehavior], ["Backup & reset", "backup", pgBackup]];
 
 let S = null; // settings state
 function openSettings(cat = 0, sub) {
@@ -1029,6 +1081,237 @@ setInterval(() => {
 }, 15000);
 function wake() { lastInput = Date.now(); if (dimmer) { dimmer.remove(); dimmer = null; return true; } return false; }
 
+/* ===================================================================== scores */
+const ESPN = "https://site.api.espn.com/apis/site/v2/sports/";
+const LG_PATH = { nfl: "football/nfl", nba: "basketball/nba", mlb: "baseball/mlb" };
+const LG_NAME = { nfl: "NFL", nba: "NBA", mlb: "MLB" };
+// Network -> app. NBC always opens Peacock.
+const NET_APP = [
+  [/^(nbc|peacock|usa)/i, "peacock"], [/^(espn|abc)/i, "espn"], [/^(fox|fs1|fs2)/i, "fox"], [/^(cbs|paramount)/i, "cbs"],
+  [/prime/i, "prime"], [/netflix/i, "netflix"], [/^apple/i, "appletv"], [/^(tnt|tbs|trutv|max)/i, "hbomax"],
+  [/^nfl ?(network|\+)/i, "nfl"], [/^mlb ?(network|\.tv|tv)/i, "mlb"], [/youtube/i, "youtube"],
+];
+function watchOn(g) {
+  for (const n of [...g.nat, ...g.nets]) for (const [re, id] of NET_APP)
+    if (re.test(n) && byId[id] && !cfg.hidden.includes(id)) return { net: n, app: byId[id] };
+  return null;
+}
+function hexHue(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return null;
+  const n = parseInt(m[1], 16), r = (n >> 16) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; if (!d) return 30;
+  const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return Math.round((h * 60 + 360) % 360);
+}
+
+/* fetch: on the TV through the Android shell (no browser restrictions), in a browser with fetch() */
+let fetchSeq = 0; const pending = {};
+window.lumenFetched = (id, code, body) => {
+  const p = pending[id]; if (!p) return; delete pending[id];
+  if (code >= 200 && code < 300) { try { p.res(JSON.parse(body)); } catch (e) { p.rej(e); } } else p.rej(new Error("HTTP " + code));
+};
+function getJSON(url) {
+  if (AND && AND.fetchAsync) return new Promise((res, rej) => {
+    const id = "f" + (++fetchSeq); pending[id] = { res, rej }; AND.fetchAsync(id, url);
+    setTimeout(() => { if (pending[id]) { delete pending[id]; rej(new Error("timeout")); } }, 20000);
+  });
+  return fetch(url).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+}
+
+function normGame(ev, lg) {
+  const c = ev && ev.competitions && ev.competitions[0]; if (!c) return null;
+  const ty = ((c.status || ev.status || {}).type) || {};
+  const side = h => {
+    const x = (c.competitors || []).find(k => k.homeAway === h) || {}, t = x.team || {}, sc = x.score;
+    const score = sc == null ? "" : typeof sc === "object" ? String(sc.displayValue ?? sc.value ?? "") : String(sc);
+    return { id: String(t.id || ""), abbr: t.abbreviation || "", name: t.shortDisplayName || t.name || t.displayName || "?",
+      color: t.color ? "#" + t.color : "", score };
+  };
+  const nets = [], nat = [], add = (n, national) => { if (!n) return; if (!nets.includes(n)) nets.push(n); if (national && !nat.includes(n)) nat.push(n); };
+  for (const b of c.broadcasts || []) {
+    const mk = typeof b.market === "string" ? b.market : (b.market && b.market.type) || "";
+    for (const n of b.names || []) add(n, /national/i.test(mk));
+    if (b.media) add(b.media.shortName, /national/i.test(mk));
+  }
+  for (const b of c.geoBroadcasts || []) add(b.media && b.media.shortName, /national/i.test((b.market && b.market.type) || ""));
+  const state = ty.state || (ty.completed ? "post" : "pre");
+  return { id: String(ev.id), lg, t: Date.parse(c.date || ev.date), state, detail: ty.shortDetail || ty.detail || "",
+    away: side("away"), home: side("home"), nets, nat, label: "" };
+}
+function nflPrimeLabel(t) {
+  const d = new Date(t), day = d.getDay(), hr = d.getHours() + d.getMinutes() / 60;
+  if (day === 4) return "Thursday Night Football";
+  if (day === 1) return "Monday Night Football";
+  if (day === 0 && hr >= 18) return "Sunday Night Football";
+  if (day === 6 && hr >= 18) return "Saturday Night Football";
+  if (hr >= 18.5) return "Prime time";
+  return "";
+}
+const SHORT_LABEL = { "Thursday Night Football": "TNF", "Sunday Night Football": "SNF", "Monday Night Football": "MNF", "Saturday Night Football": "Sat night", "Prime time": "Prime" };
+const keepFinal = g => g.state !== "post" || Date.now() - g.t < (cfg.scores.finalHours + 4) * 3600e3;
+
+let scoreData = { mine: [], prime: [], sample: false }, scoreBusy = false, scoreTimer = null;
+async function loadScores() {
+  clearTimeout(scoreTimer);
+  if (!cfg.scores.on) { scoreData = { mine: [], prime: [] }; return refreshScores(); }
+  if (scoreBusy) return; scoreBusy = true;
+  try {
+    const leagues = [...new Set(cfg.scores.teams.map(t => t.lg).concat(cfg.scores.primeNfl ? ["nfl"] : [], cfg.scores.primeNba ? ["nba"] : []))];
+    const boards = {}, sched = {};
+    await Promise.all([
+      ...leagues.map(lg => getJSON(ESPN + LG_PATH[lg] + "/scoreboard").then(j => { boards[lg] = (j.events || []).map(e => normGame(e, lg)).filter(Boolean); }).catch(() => {})),
+      ...cfg.scores.teams.map(tm => getJSON(ESPN + LG_PATH[tm.lg] + "/teams/" + tm.id + "/schedule").then(j => { sched[tm.lg + tm.id] = (j.events || []).map(e => normGame(e, tm.lg)).filter(Boolean); }).catch(() => {})),
+    ]);
+    if (!Object.keys(boards).length && !Object.keys(sched).length) throw new Error("offline");
+    const now = Date.now(), mine = [], seen = new Set();
+    for (const tm of cfg.scores.teams) {
+      const board = (boards[tm.lg] || []).filter(g => g.home.id === tm.id || g.away.id === tm.id);
+      const list = [...board, ...(sched[tm.lg + tm.id] || [])];
+      const today = g => g.state === "pre" && new Date(g.t).toDateString() === new Date().toDateString();
+      const pick = list.find(g => g.state === "in") || list.filter(today).sort((a, b) => a.t - b.t)[0]
+        || list.filter(g => g.state === "post" && now - g.t < (cfg.scores.finalHours + 4) * 3600e3).sort((a, b) => b.t - a.t)[0]
+        || list.filter(g => g.state === "pre" && g.t > now - 3 * 3600e3 && g.t - now < 8 * 86400e3).sort((a, b) => a.t - b.t)[0];
+      if (!pick || seen.has(pick.id)) continue;
+      const fresh = board.find(g => g.id === pick.id) || pick;           // scoreboard has the live score
+      seen.add(fresh.id); mine.push(fresh);
+    }
+    const prime = [];
+    if (cfg.scores.primeNfl) for (const g of boards.nfl || []) {
+      const label = nflPrimeLabel(g.t); if (!label || seen.has(g.id) || !keepFinal(g)) continue;
+      g.label = label; prime.push(g); seen.add(g.id);
+    }
+    if (cfg.scores.primeNba) for (const g of boards.nba || []) {
+      if (seen.has(g.id) || !keepFinal(g) || !g.nat.some(n => /espn|abc|nbc|peacock|prime|tnt/i.test(n))) continue;
+      g.label = g.nat[0]; prime.push(g); seen.add(g.id);
+    }
+    prime.sort((a, b) => (a.state === "in" ? -1 : 0) - (b.state === "in" ? -1 : 0) || a.t - b.t);
+    for (const g of mine) if (g.lg === "nfl" && !g.label) g.label = nflPrimeLabel(g.t);
+    scoreData = { mine, prime, sample: false };
+  } catch { if (!AND) scoreData = sampleScores(); }
+  scoreBusy = false;
+  refreshScores();
+  const live = [...scoreData.mine, ...scoreData.prime].some(g => g.state === "in");
+  scoreTimer = setTimeout(loadScores, (live ? 60 : 600) * 1000);
+}
+function refreshScores() {
+  if (view === "home") { const k = focusKey(); buildHome(); restoreFocus(k); }
+}
+function gameStatus(g) {
+  if (g.state === "in") return g.detail || "Live";
+  if (g.state === "post") return g.detail || "Final";
+  const d = new Date(g.t), now = new Date(), tm = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const days = Math.round((new Date(d.toDateString()) - new Date(now.toDateString())) / 86400e3);
+  return days === 0 ? tm : days === 1 ? "Tomorrow " + tm : d.toLocaleDateString([], { weekday: "short" }) + " " + tm;
+}
+function gameCard(g) {
+  const post = g.state === "post", a = +g.away.score, h = +g.home.score, w = watchOn(g), net = (w && w.net) || g.nat[0] || g.nets[0] || "";
+  const line = (s, lose) => `<div class="gt${lose ? " lose" : ""}"><i style="background:${esc(s.color || "var(--line)")}"></i><b>${esc(s.abbr)}</b><span>${esc(s.name)}</span><em>${g.state === "pre" ? "" : esc(s.score)}</em></div>`;
+  const c = el("div", `gm ${g.state === "in" ? "live" : g.state}`,
+    `<div class="gtop"><span>${LG_NAME[g.lg]}${g.label && g.lg === "nfl" ? " · " + esc(SHORT_LABEL[g.label] || g.label) : ""}</span><span class="gst">${esc(gameStatus(g))}</span></div>
+     ${line(g.away, post && a < h)}${line(g.home, post && h < a)}
+     <div class="gnet">${net ? `<span class="chip">${esc(net)}</span>` : ""}${w && w.app.name.toLowerCase() !== net.toLowerCase() ? `<span class="go">${esc(w.app.name)}</span>` : ""}</div>`);
+  if (g.away.color) c.style.setProperty("--ca", g.away.color); if (g.home.color) c.style.setProperty("--ch", g.home.color);
+  return c;
+}
+const STRIP_MIN = 6, STRIP_CAP = 9, TITLE_MIN = 420;
+const SHORT_NET = { "Prime Video": "Prime", "Peacock": "Peacock", "NBA TV": "NBA TV", "NFL Network": "NFL Net", "MLB Network": "MLB Net" };
+const isToday = g => new Date(g.t).toDateString() === new Date().toDateString();
+const mustShow = g => g.state === "in" || (g.state === "pre" && isToday(g));
+function allGames() {
+  // live first, then upcoming (today, then later days), then finals; your teams before prime time within each group
+  const all = [...scoreData.mine, ...scoreData.prime], rank = g => g.state === "in" ? 0 : g.state === "pre" ? (isToday(g) ? 1 : 2) : 3;
+  return all.map((g, i) => [g, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || (rank(a[0]) === 1 || rank(a[0]) === 2 ? a[0].t - b[0].t : 0) || a[1] - b[1]).map(x => x[0]);
+}
+function chip(g) {
+  const post = g.state === "post", a = +g.away.score, h = +g.home.score, w = watchOn(g), net = (w && w.net) || g.nat[0] || g.nets[0] || "";
+  const tag = g.lg === "nfl" && g.label ? SHORT_LABEL[g.label] || LG_NAME[g.lg] : LG_NAME[g.lg];
+  const st = g.state === "pre" ? gameStatus(g) : (g.detail || (post ? "Final" : "Live"));
+  const ln = (t, lose) => `<div class="tl${lose ? " lose" : ""}"><span>${esc(t.abbr)}</span><em>${g.state === "pre" ? "" : esc(t.score)}</em></div>`;
+  const c = el("div", `sc ${g.state === "in" ? "live" : g.state}`,
+    `<div class="l1"><span>${esc(g.state === "pre" ? st.replace("Tomorrow", "Tmrw") : st)}</span><span>${esc(SHORT_NET[net] || net)}</span></div>${ln(g.away, post && a < h)}${ln(g.home, post && h < a)}`);
+  if (g.away.color) c.style.setProperty("--ca", g.away.color); if (g.home.color) c.style.setProperty("--ch", g.home.color);
+  return c;
+}
+function buildScores() {
+  const strip = $("#strip"); strip.innerHTML = "";
+  const list = cfg.scores.on ? allGames() : [];
+  strip.hidden = !list.length; if (!list.length) return;
+  const must = list.filter(mustShow).length;
+  let slots = Math.min(STRIP_CAP, Math.max(STRIP_MIN, must + (list.length > must ? 1 : 0)));
+  const show = list.length > slots ? list.slice(0, slots - 1) : list.slice(0, slots);
+  const n = show.length + (list.length > show.length ? 1 : 0);
+  strip.style.setProperty("--cw", Math.min(186, Math.floor((1728 - TITLE_MIN - 32 - (n - 1) * 12) / n)) + "px");
+  const items = show.map(g => { const c = chip(g); strip.append(c); return { el: c, kind: "game", data: g, key: "g:" + g.id, scale: 1.08, rad: 14 }; });
+  if (list.length > show.length) {
+    const c = el("div", "sc more", `<b>+${list.length - show.length}</b><span>All scores</span>`); strip.append(c);
+    items.push({ el: c, kind: "scores", key: "g:more", scale: 1.08, rad: 14 });
+  }
+  rows.push({ id: "strip", items });
+}
+function openScores() {
+  const L = el("div", "layer solid scores-ov", `<div class="ov-head"><h2>Scores</h2></div><div class="scroller"><div class="inner"></div></div>`);
+  openLayer(L, "grid");
+  const inner = L.querySelector(".inner"), navRows = [];
+  for (const [name, list] of [["My teams", scoreData.mine], ["Prime time", scoreData.prime]]) {
+    if (!list.length) continue;
+    const sub = el("section", "sec sub", `<div class="label">${name}</div>`), g = el("div", "games"); sub.append(g); inner.append(sub);
+    const items = list.map(x => { const c = gameCard(x); g.append(c); return { el: c, kind: "game", data: x, scale: 1.05, rad: 20 }; });
+    for (let i = 0; i < items.length; i += 4) navRows.push(items.slice(i, i + 4));
+  }
+  grid = { rows: navRows, inner, scroller: L.querySelector(".scroller") };
+  navRows.flat().forEach(i => i.el.onclick = () => { const r = navRows.findIndex(x => x.includes(i)); gridFocus(r, navRows[r].indexOf(i)); activate(); });
+  ringHost(inner); ring.cur = null; if (navRows.length) gridFocus(0, 0);
+}
+function sampleScores() {
+  const H = 3600e3, now = Date.now(), at = (days, hr, mn) => { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(hr, mn, 0, 0); return +d; };
+  const nextDay = (dow, hr, mn) => { const d = new Date(); d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7 || 7)); d.setHours(hr, mn, 0, 0); return +d; };
+  const T = (abbr, name, color, score = "") => ({ id: abbr, abbr, name, color, score });
+  const G = (lg, t, state, detail, away, home, nets, label = "") => ({ id: lg + away.abbr + home.abbr, lg, t, state, detail, away, home, nets, nat: nets, label });
+  return { sample: true,
+    mine: [
+      G("nfl", now - 20 * H, "post", "Final", T("CHI", "Bears", "#0b162a", "24"), T("DET", "Lions", "#0076b6", "20"), ["FOX"]),
+      G("nfl", nextDay(0, 19, 20), "pre", "", T("GB", "Packers", "#204e32"), T("PHI", "Eagles", "#06424d"), ["NBC"], "Sunday Night Football"),
+      G("nba", now - .8 * H, "in", "Q3 4:12", T("MIL", "Bucks", "#00471b", "71"), T("CHI", "Bulls", "#ce1141", "68"), ["CHSN"]) ],
+    prime: [
+      G("nba", at(0, 19, 0), "pre", "", T("BOS", "Celtics", "#007a33"), T("NY", "Knicks", "#f58426"), ["Peacock"], "Peacock"),
+      G("nba", at(0, 21, 30), "pre", "", T("LAL", "Lakers", "#552583"), T("GS", "Warriors", "#1d428a"), ["Prime Video"], "Prime Video"),
+      G("nfl", nextDay(4, 19, 15), "pre", "", T("PIT", "Steelers", "#000000"), T("CLE", "Browns", "#311d00"), ["Prime Video"], "Thursday Night Football"),
+      G("nfl", nextDay(1, 19, 15), "pre", "", T("KC", "Chiefs", "#e31837"), T("BUF", "Bills", "#00338d"), ["ESPN", "ABC"], "Monday Night Football"),
+      G("nba", now - .5 * H, "in", "Q2 6:40", T("DEN", "Nuggets", "#0e2240", "41"), T("PHX", "Suns", "#1d1160", "45"), ["ESPN"], "ESPN"),
+      G("nba", at(0, 22, 0), "pre", "", T("MIN", "Wolves", "#0c2340"), T("LAC", "Clippers", "#c8102e"), ["NBC"], "NBC") ] };
+}
+
+/* settings: teams */
+const teamCatalog = {};
+function loadCatalog(lg) {
+  if (Array.isArray(teamCatalog[lg]) || teamCatalog[lg] === "loading") return;
+  teamCatalog[lg] = "loading";
+  getJSON(ESPN + LG_PATH[lg] + "/teams").then(j => {
+    teamCatalog[lg] = ((((j.sports || [])[0] || {}).leagues || [])[0] || {}).teams.map(x => x.team).map(t => ({ id: String(t.id), name: t.shortDisplayName || t.name, full: t.displayName }))
+      .sort((a, b) => a.full.localeCompare(b.full));
+  }).catch(() => {
+    teamCatalog[lg] = AND ? "error" : cfg.scores.teams.filter(t => t.lg === lg).map(t => ({ id: t.id, name: t.name, full: t.name }));
+  }).finally(() => { if (view === "settings") renderSettings(); });
+}
+function pgScores() { return { crumb: "Lumen Settings", title: "Scores", rows: [
+  T("Show scores", () => cfg.scores.on, v => { cfg.scores.on = v; setTimeout(loadScores, 0); }),
+  A("Reorder my teams", () => push(() => ({ crumb: "Scores", title: "My teams",
+    reorder: { get: () => cfg.scores.teams.map(t => t.lg + ":" + t.id), set: ids => cfg.scores.teams = ids.map(k => cfg.scores.teams.find(t => t.lg + ":" + t.id === k)),
+      label: k => { const t = cfg.scores.teams.find(x => x.lg + ":" + x.id === k); return `${t.name} · ${LG_NAME[t.lg]}`; } } })), `${cfg.scores.teams.length} teams`, { chev: true }),
+  ...Object.keys(LG_PATH).map(lg => A(`${LG_NAME[lg]} teams`, () => { loadCatalog(lg); push(() => pgTeams(lg)); },
+    cfg.scores.teams.filter(t => t.lg === lg).map(t => t.name).join(", ") || "None", { chev: true })),
+  HEAD("Prime time"),
+  T("NFL night games", () => cfg.scores.primeNfl, v => { cfg.scores.primeNfl = v; setTimeout(loadScores, 0); }),
+  T("NBA national games", () => cfg.scores.primeNba, v => { cfg.scores.primeNba = v; setTimeout(loadScores, 0); }),
+  C("Keep final scores", [[12, "12 hours"], [18, "18 hours"], [36, "36 hours"]], () => cfg.scores.finalHours, v => { cfg.scores.finalHours = v; setTimeout(loadScores, 0); }),
+] }; }
+function pgTeams(lg) {
+  const cat = teamCatalog[lg];
+  if (!Array.isArray(cat)) return { crumb: "Scores", title: `${LG_NAME[lg]} teams`, rows: [HEAD(cat === "error" ? "Couldn't load teams. Check the internet connection." : "Loading teams…")] };
+  return { crumb: "Scores", title: `${LG_NAME[lg]} teams`, rows: cat.map(t => T(t.full,
+    () => cfg.scores.teams.some(x => x.lg === lg && x.id === t.id),
+    v => { cfg.scores.teams = cfg.scores.teams.filter(x => !(x.lg === lg && x.id === t.id)); if (v) cfg.scores.teams.push({ lg, id: t.id, name: t.name }); setTimeout(loadScores, 0); })) };
+}
+
 /* ===================================================================== sound */
 let actx = null;
 const SFX = {
@@ -1116,7 +1399,7 @@ window.lumenHome = () => {
   closeLayer(); buildHome(); startFocus();
 };
 window.lumenResume = () => {
-  syncInputs(); lastUsed = mergeRecents(lastUsed, TV.recents());
+  syncInputs(); lastUsed = mergeRecents(lastUsed, TV.recents()); loadScores();
   if (view === "app") goHome(); else if (view === "home") { const k = focusKey(); buildHome(); restoreFocus(k); }
 };
 window.lumenToast = msg => toast(msg);
@@ -1130,7 +1413,7 @@ stage.addEventListener("contextmenu", e => {
 function fit() { const v = $("#viewport"), s = Math.min(v.clientWidth / 1920, v.clientHeight / 1080); stage.style.transform = `scale(${s}) translate(-50%, -50%)`; }
 window.addEventListener("resize", fit); fit();
 syncInputs(); applyCfg(); startFocus(); homeHints();
-setInterval(tick, 10000); loadWeather(); setInterval(loadWeather, 15 * 60e3);
+setInterval(tick, 10000); loadWeather(); setInterval(loadWeather, 15 * 60e3); loadScores();
 </script>
 
 </body>
