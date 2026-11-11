@@ -34,6 +34,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -297,6 +300,42 @@ public class MainActivity extends Activity {
                     startActivity(new Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 } catch (Exception ignored) { }
             });
+        }
+
+        /** Fetches ESPN score data off the UI thread and hands it back to the page. ESPN hosts only. */
+        @JavascriptInterface
+        public void fetchAsync(final String id, final String url) {
+            final String cb = JSONObject.quote(id);
+            if (url == null || !url.startsWith("https://site.api.espn.com/")) {
+                js("window.lumenFetched && lumenFetched(" + cb + ",0,'')");
+                return;
+            }
+            new Thread(() -> {
+                int code = 0;
+                String body = "";
+                HttpURLConnection c = null;
+                try {
+                    c = (HttpURLConnection) new URL(url).openConnection();
+                    c.setConnectTimeout(8000);
+                    c.setReadTimeout(15000);
+                    c.setRequestProperty("User-Agent", "Lumen/1.0 (Android TV)");
+                    code = c.getResponseCode();
+                    InputStream in = code < 400 ? c.getInputStream() : c.getErrorStream();
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    if (in != null) {
+                        byte[] buf = new byte[16384];
+                        int n;
+                        while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                        in.close();
+                    }
+                    body = out.toString("UTF-8");
+                } catch (Exception e) {
+                    code = 0;
+                } finally {
+                    if (c != null) c.disconnect();
+                }
+                js("window.lumenFetched && lumenFetched(" + cb + "," + code + "," + JSONObject.quote(body) + ")");
+            }).start();
         }
 
         @JavascriptInterface
