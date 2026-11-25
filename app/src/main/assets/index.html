@@ -179,6 +179,11 @@ html.device .stage { border-radius: 0; }
 .st-mono.live .sigdot { background: #121216; box-shadow: none; }
 .st-red { background: linear-gradient(150deg, #e2313b, #8f121b); color: #fff; }
 .st-red .n { font-weight: 700; letter-spacing: -.01em; }
+.st-aqua { background: linear-gradient(150deg, #0e5a61, #06282d); color: #e3fbfb; box-shadow: inset 0 0 0 1px rgb(80 215 220 / .25); }
+.st-aqua .n { font-weight: 500; letter-spacing: -.02em; }
+.st-aqua.live .sigdot { background: #4fd8dc; box-shadow: 0 0 14px #4fd8dc; }
+.st-aqua .glyph { opacity: 1; right: 26px; bottom: 22px; }
+.pclogo { width: 150px; height: 118px; display: block; }
 .st-ambient { background: linear-gradient(150deg, hsl(var(--g0, 250) 45% 30%), hsl(var(--g0, 250) 45% 13%)); }
 .st-ambient .n { font-weight: 400; }
 .st-image { background: #000 center / cover no-repeat; }
@@ -376,7 +381,7 @@ if (AND) document.documentElement.classList.add("device");
 
 /* ===================================================================== config */
 const DEFAULTS = {
-  v: 4, tvName: "Bedroom TV",
+  v: 5, tvName: "Bedroom TV",
   recents: { on: true, count: 4, exclude: [] },
   hero: true, density: 8, names: true, namePos: "top",
   sections: [
@@ -387,7 +392,7 @@ const DEFAULTS = {
   ],
   hidden: [], logos: {},
   ports: [
-    { id: "hdmi1", label: "HDMI 1", name: "Switch 2", brand: "Nintendo", style: "red", earc: false, other: true, img: null, live: true },
+    { id: "hdmi1", label: "HDMI 1", name: "PC", brand: "", style: "aqua", earc: false, other: true, img: null, live: true },
     { id: "hdmi2", label: "HDMI 2", name: "", brand: "", style: "ambient", earc: false, other: true, img: null, live: false },
     { id: "hdmi3", label: "HDMI 3", name: "Apple TV", brand: "Apple", style: "mono", earc: false, other: true, img: null, live: true },
     { id: "hdmi4", label: "HDMI 4", name: "SONY HTC-390", brand: "Sony", style: "ambient", earc: true, other: true, img: null, live: true },
@@ -421,6 +426,8 @@ function merge(saved) {
   }
   if (!(saved.v >= 2)) c.fps = 60;   // v2: smoother default
   if (!(saved.v >= 3)) c.hintsOn = false;   // v3: no on-screen button hints by default
+  if (!(saved.v >= 5)) { const h1 = (c.ports || []).find(p => p.id === "hdmi1");   // v5: HDMI 1 is now the PC
+    if (h1) Object.assign(h1, { name: "PC", brand: "", style: "aqua" }); }
   c.v = DEFAULTS.v;
   return c;
 }
@@ -471,6 +478,13 @@ function tile(a, size) {
   t.style.setProperty("--th", a.h); t.style.setProperty("--ts", a.s + "%"); return t;
 }
 const JACK = `<span class="jack"></span>`;
+const PC_LOGO = `<svg class="pclogo" viewBox="0 0 150 118" fill="none" aria-hidden="true">
+  <rect x="4" y="4" width="142" height="86" rx="10" stroke="#4fd8dc" stroke-width="4"/>
+  <rect x="13" y="13" width="124" height="68" rx="5" fill="#04262b"/>
+  <text x="75" y="56" text-anchor="middle" font-family="JetBrains Mono, Consolas, monospace" font-weight="700" font-size="25" letter-spacing="4" fill="#4fd8dc">VEYRA</text>
+  <path d="M64 90 L60 106 H90 L86 90" fill="#0b4950" stroke="#4fd8dc" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M46 110 H104" stroke="#4fd8dc" stroke-width="5" stroke-linecap="round"/>
+</svg>`;
 const WAVE = `<svg class="wave" viewBox="0 0 56 28"><path d="M3 14h4M12 8v12M20 3v22M28 9v10M36 5v18M44 10v8M52 13v2" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" fill="none"/></svg>`;
 const CAST = `<svg class="gl" viewBox="0 0 70 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M22 33a18 18 0 0 1 26 0M14 25a29 29 0 0 1 42 0M6 17a40 40 0 0 1 58 0"/><circle cx="35" cy="37" r="2.5" fill="currentColor"/></svg>`;
 
@@ -553,7 +567,7 @@ function buildHome() {
     const p = portById(pid); if (!p) continue;
     const c = el("div", `incard st-${p.style}${p.live ? " live" : ""}`,
       `<div class="k">${esc(p.brand ? p.brand + " · " : "")}${p.label}${p.earc ? " · eARC" : ""}</div><div class="n">${esc(portName(p))}</div>
-       <div class="s"><span class="sigdot"></span>${p.live ? "Signal" : "No signal"}</div><div class="glyph">${JACK}</div>`);
+       <div class="s"><span class="sigdot"></span>${p.live ? "Signal" : "No signal"}</div><div class="glyph">${p.style === "aqua" ? PC_LOGO : JACK}</div>`);
     if (p.style === "image" && p.img) c.style.backgroundImage = `url("${p.img}")`;
     c.style.setProperty("--g0", 30); dock.append(c); items.push({ el: c, kind: "featured", data: p, key: "f:" + p.id, scale: 1.05, rad: 22 });
   }
@@ -598,7 +612,7 @@ function updateHero(it) {
   } else if (it.kind === "allapps") { k = "Library"; t = "All apps"; m = `${apps.length - cfg.hidden.length} apps in ${cfg.sections.length} categories`; h = 255; }
   else if (it.kind === "lumen") { k = "Customize"; t = "Lumen Settings"; m = "Layout, sections, inputs, look and motion"; h = 285; }
   else if (it.kind === "tvset") { k = "System"; t = "TV Settings"; m = "Opens the TV's own settings: picture, sound, network"; h = 215; }
-  else if (it.kind === "featured") { const p = it.data; k = `Input · ${p.label}${p.earc ? " · eARC" : ""}`; t = portName(p); m = (p.live ? "Signal detected" : "No signal") + " · Press OK to switch"; h = p.style === "red" ? 356 : p.style === "mono" ? 225 : 30; }
+  else if (it.kind === "featured") { const p = it.data; k = `Input · ${p.label}${p.earc ? " · eARC" : ""}`; t = portName(p); m = (p.live ? "Signal detected" : "No signal") + " · Press OK to switch"; h = p.style === "red" ? 356 : p.style === "mono" ? 225 : p.style === "aqua" ? 185 : 30; }
   else if (it.kind === "scores") { k = "Scores"; t = "All scores"; m = ""; h = 30; }
   else if (it.kind === "game") { const g = it.data; k = LG_NAME[g.lg] + (g.label ? " · " + g.label : ""); t = `${g.away.name} at ${g.home.name}`; m = ""; h = hexHue(g.home.color) ?? 30; }
   else { k = "Inputs"; t = "Other sources"; m = "Every HDMI port, plus AirPlay"; h = 30; }
@@ -744,7 +758,7 @@ function quickOptions(it) {
     return openSheet(sec ? sec.name : "App", a.name, opts);
   }
   if (it.kind === "featured" || it.kind === "port") {
-    const p = it.data, feat = cfg.featured.includes(p.id), styles = ["mono", "red", "ambient", "image"];
+    const p = it.data, feat = cfg.featured.includes(p.id), styles = ["mono", "red", "aqua", "ambient", "image"];
     const opts = [];
     if (it.kind === "featured") opts.push({ label: "Move earlier", run: () => moveIn(cfg.featured, p.id, -1) ? commit("Moved") : toast("Already first") },
                                           { label: "Move later", run: () => moveIn(cfg.featured, p.id, 1) ? commit("Moved") : toast("Already last") });
@@ -755,7 +769,7 @@ function quickOptions(it) {
     return openSheet(p.label + (p.earc ? " · eARC" : ""), portName(p), opts);
   }
 }
-const STYLE_NAMES = { mono: "Silver", red: "Red", ambient: "Ambient", image: "Image" };
+const STYLE_NAMES = { mono: "Silver", red: "Red", aqua: "PC · Aqua", ambient: "Ambient", image: "Image" };
 
 /* ===================================================================== images */
 function pickImage(max, cb) {
